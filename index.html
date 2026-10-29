@@ -15,14 +15,14 @@
 <style>
 :root{--bg:#120d26;--panel:#1d1640;--ink:#fff7e0;--dim:#b5a9e6;--accent:#ffd23f;--pink:#ff6fb5;--cyan:#59e0ff;--line:#3a2f78}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:#0a0716;color:var(--ink);font-family:'Pixelify Sans',ui-monospace,Menlo,Consolas,monospace}
+html,body{margin:0;height:100%;background:#0a0716;color:var(--ink);font-variant-ligatures:none;font-feature-settings:'liga' 0,'clig' 0;font-family:'Pixelify Sans',ui-monospace,Menlo,Consolas,monospace}
 #app{max-width:420px;height:100vh;height:100dvh;max-height:920px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
 #hud{height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px;font-size:15px;color:var(--dim);background:#0d0920;border-bottom:3px solid var(--line)}
-#chip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
-#stab{display:flex;align-items:center;gap:6px;font-size:14px}
+#chip{min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
+#stab{flex:none;display:flex;align-items:center;gap:6px;font-size:14px}
 #stab i{display:block;width:54px;height:8px;background:#2a2060;border:2px solid var(--line)}
 #stab u{display:block;height:100%;width:100%;background:var(--cyan);transition:width .6s,background .6s;text-decoration:none}
-#mute{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:2px solid var(--line);padding:2px 6px;cursor:pointer}
+#mute{white-space:nowrap;flex:none;font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:2px solid var(--line);padding:2px 6px;cursor:pointer}
 #stage{position:relative;flex:none;background:#000;line-height:0}
 #cv{width:100%;aspect-ratio:4/3;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 #timer{position:absolute;left:0;bottom:0;height:7px;width:100%;background:var(--pink);display:none}
@@ -61,17 +61,34 @@ html,body{margin:0;height:100%;background:#0a0716;color:var(--ink);font-family:'
 .ans.bad{animation:shake .3s;border-color:var(--pink)}
 .love{white-space:pre-line;font-size:19px;line-height:1.45;margin:0 0 12px}
 .big{font-size:18px;margin:0 0 10px;color:var(--dim)}
-@media (prefers-reduced-motion:reduce){.opt{animation:none;opacity:1}#flash,#stab u{transition:none}}
+.spk{display:inline-block;font-family:'Press Start 2P',monospace;font-size:10px;letter-spacing:1px;line-height:1;padding:5px 8px 4px;border-radius:4px;margin:0 0 8px;color:#120d26;background:var(--sp,#b5a9e6);box-shadow:0 3px 0 rgba(0,0,0,.5)}
+.spk.dim{background:transparent;color:#8d83bd;border:2px solid #3a2f78;padding:3px 6px 2px;box-shadow:none;font-size:8px}
+.say{font-size:23px;line-height:1.3;border-left:4px solid var(--sp,#b5a9e6);padding-left:10px;color:#fff;min-height:3.4em}
+.say.gl{text-shadow:2px 0 #ff2fb0,-2px 0 #2fe0ff;animation:gjit .8s steps(2) infinite}
+.say.nar{border-left-color:#3a2f78}
+@keyframes gjit{0%{transform:translateX(0)}50%{transform:translateX(1px)}}
+.rn{color:#d9d0ff;border-left:4px solid #a99fd6;padding-left:10px;font-style:italic}
+.lead{font-size:19px;line-height:1.4;margin:0 0 12px;color:var(--dim)}
+.shardrow{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--accent);margin:2px 0 8px}
+#shardc{font-size:14px;color:var(--accent);white-space:nowrap;display:none}
+#shardc.on{display:inline}
+#shardc.bump{animation:bump .5s}
+@keyframes bump{30%{transform:scale(1.5)}}
+#toast{position:absolute;left:8px;right:8px;bottom:14px;line-height:1.25;font-size:16px;color:var(--ink);background:rgba(18,13,38,.93);border:2px solid var(--accent);border-radius:6px;padding:7px 10px;opacity:0;transform:translateY(6px);transition:opacity .35s,transform .35s;pointer-events:none}
+#toast.on{opacity:1;transform:none}
+#cv{touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){.opt{animation:none;opacity:1}#flash,#stab u{transition:none}.say.gl,#shardc.bump{animation:none}#toast{transition:none}}
 </style>
 </head>
 <body>
 <div id="app">
-  <header id="hud"><span id="chip">DUCK QUEST</span><span id="stab"><span>TIME</span><i><u></u></i></span><button id="mute" aria-label="Toggle sound">SND ON</button></header>
-  <div id="stage"><canvas id="cv" width="320" height="240" role="img" aria-label="Pixel art scene"></canvas><div id="timer"></div><div id="flash"></div></div>
+  <header id="hud"><span id="chip">DUCK QUEST</span><span id="shardc" aria-label="Time shards found">&#9733; 0/5</span><span id="stab"><span>TIME</span><i><u></u></i></span><button id="mute" aria-label="Toggle sound">SND ON</button></header>
+  <div id="stage"><canvas id="cv" width="320" height="240" role="img" aria-label="Pixel art scene"></canvas><div id="timer"></div><div id="flash"></div><div id="toast" role="status" aria-live="polite"></div></div>
   <main id="panel"></main>
 </div>
 <noscript>This game needs JavaScript.</noscript>
 <script>
+//#LOGIC-START
 /* ============================================================
    CONFIG: personal details. Edit these.
    ============================================================ */
@@ -93,100 +110,13 @@ const CFG = {
   ]
 };
 
-//#LOGIC-START
 const AXES = ['EI', 'SN', 'TF', 'JP'];
 const POLE_NAME = { E: 'Extravert', I: 'Introvert', S: 'Sensing', N: 'Intuition', T: 'Thinking', F: 'Feeling', J: 'Judging', P: 'Perceiving' };
 const POLES = Object.keys(POLE_NAME);
 const WIN = 3; // first pole to 3 of an axis's 5 scenes decides that axis
 const o = (t, p, d) => ({ t, p, d: !!d });
 
-const CHAPTERS = [
-  { name: 'The Studio', bg: 'studio', scenes: [
-    { id: 's1', axis: 'EI', text: "The dance studio mirrors flicker and the music skips. A crowd of ducks stands frozen mid-warmup.", opts: [
-      o("Hop up front and rally everyone into formation", 'E'), o("Slip to the quiet corner and watch the mirrors", 'I'),
-      o("Wave to the whole room: what's going on?!", 'E'), o("Find one calm duck and whisper a theory", 'I')] },
-    { id: 's2', axis: 'SN', core: 1, text: "Your reflection is a full second behind you. The floorboards hum a note that doesn't exist.", opts: [
-      o("Feel the pattern: the glitch is trying to say something", 'N'), o("Check what's physically different: the clock, the floor, the door", 'S'),
-      o("Picture how the studio looked before it broke", 'N'), o("Replay the routine step by step to find the slip", 'S')] },
-    { id: 's3', axis: 'TF', text: "The instructor duck freezes mid-spin. \"Partner switch!\" ... but one partner is stuck in the air.", opts: [
-      o("Work out the pairings logically and fix the sequence", 'T'), o("Check on the stuck duck first. Are they scared?", 'F'),
-      o("Cheer the others on so nobody feels lost", 'F'), o("Spot the flaw in the rotation and reorder it", 'T')] },
-    { id: 's4', axis: 'JP', timed: 1, rival: 'shadow', text: "The song loops. A shadowy goose watches from the doorway, then it's gone! The beat drops in ten seconds.", opts: [
-      o("Make a quick plan: three moves, then stick to it", 'J'), o("Chase the goose and figure it out on the way", 'P'),
-      o("Mark the exit and count the beats", 'J'), o("Improvise a move and see what happens", 'P', 1)] }
-  ], after: { bg: 'studio', rival: 'shadow', glitch: .35,
-    text: "The goose slips a note under your wing: \"BOBA SHOP. HURRY.\" The clock-egg lurches, and the mirrors go dark.",
-    note: "I met someone at a dance studio once. Best accident I ever stumbled into." } },
-
-  { name: 'The Boba Shop', bg: 'boba', scenes: [
-    { id: 's5', axis: 'SN', text: "The menu board flickers between flavors that don't exist. The line is very long.", opts: [
-      o("Order the one you already know you love", 'S'), o("Pick the weirdest flavor on the glitching board", 'N'),
-      o("Read the real menu carefully, price by price", 'S'), o("Invent a custom combo nobody's tried", 'N')] },
-    { id: 's6', axis: 'EI', rival: 'smirk', text: "Every seat is taken. A silence stretches. The goose sips from the next booth, grinning.", opts: [
-      o("Let the quiet sit while you observe", 'I'), o("Fill the silence with a wild story", 'E'),
-      o("Study the goose from behind your cup", 'I'), o("Stroll over and say hi to the goose", 'E')] },
-    { id: 's7', axis: 'JP', text: "Your order number keeps changing: 41, 14, 4-1-ish. Pearls drift toward the ceiling.", opts: [
-      o("Wing it and grab whichever cup lands near you", 'P'), o("Track the number and stand exactly at the counter", 'J'),
-      o("Wander around and see what the shop shows you", 'P'), o("List what you need before moving an inch", 'J')] },
-    { id: 's8', axis: 'TF', core: 1, rival: 'smirk', text: "The goose offers a trade: their last boba for a secret. Their eyes say \"please.\"", opts: [
-      o("Weigh it logically: what do they gain?", 'T'), o("Trust them, they look like they need a friend", 'F'),
-      o("Ask for the catch before agreeing", 'T'), o("Share your boba, because it just feels right", 'F')] }
-  ], after: { bg: 'boba', rival: 'smirk', glitch: .4,
-    text: "The receipt prints itself: \"ARCADE, 8PM.\" The lights cut out, and somewhere a cabinet says GAME OVER.",
-    note: "First date was boba. I was too excited to taste anything." } },
-
-  { name: 'The Arcade', bg: 'arcade', scenes: [
-    { id: 's9', axis: 'TF', text: "A co-op cabinet shows two ducks about to lose. Your partner's score is... not great.", opts: [
-      o("Hype them up: morale wins games", 'F'), o("Be honest about the numbers: we need a strategy", 'T'),
-      o("Take the blame so they don't feel the pressure", 'F'), o("Study the patterns and fix the plan", 'T')] },
-    { id: 's10', axis: 'SN', text: "The claw machine holds a golden egg, but the controls are scrambled.", opts: [
-      o("Test the controls on a cheap prize first", 'S'), o("Trust your gut on the timing", 'N'),
-      o("Guess what the glitch wants you to grab", 'N'), o("Study the claw's exact sway before dropping", 'S')] },
-    { id: 's11', axis: 'JP', timed: 1, rival: 'rattled', text: "Tickets pour out and the arcade closes in ten ticks!", opts: [
-      o("Feed them all to the nearest machine", 'P', 1), o("Spend them on the prize you picked earlier", 'J'),
-      o("Trade for whatever's shiniest", 'P'), o("Sort and count the tickets before choosing", 'J')] },
-    { id: 's12', axis: 'EI', core: 1, text: "The big question is next. Your heart flaps like a loose wing.", opts: [
-      o("Say it out loud, boldly, right there", 'E'), o("Pull them aside for a private moment", 'I'),
-      o("Hype yourself up and walk right up", 'E'), o("Write it on a prize ticket and hand it over", 'I')] }
-  ], after: { bg: 'arcade', glitch: .45,
-    text: "A smell of burnt sugar drifts through the emergency lights. The goose is gone. The Glitch is closer.",
-    note: "We hit the arcade right before I asked. Turns out it's a great stalling tactic." } },
-
-  { name: 'The Muffin Kitchen', bg: 'kitchen', scenes: [
-    { id: 's13', axis: 'JP', text: "The recipe card flickers: half the steps are missing!", opts: [
-      o("Follow it to the letter and fill gaps with logic", 'J'), o("Toss in what feels right", 'P'),
-      o("Swap ingredients, because surprise is half the fun", 'P'), o("Prep every ingredient before touching the oven", 'J')] },
-    { id: 's14', axis: 'EI', text: "Duck friends keep popping out of time loops into your kitchen.", opts: [
-      o("Mix quietly in the corner, small batch only", 'I'), o("Put everyone to work. It's a party now!", 'E'),
-      o("Close the door and bake this one solo", 'I'), o("Narrate the bake like a cooking show", 'E')] },
-    { id: 's15', axis: 'SN', text: "The oven timer counts backward. The batter glows faintly.", opts: [
-      o("Wonder what flavor could stop time", 'N'), o("Taste a bit and check the texture", 'S'),
-      o("Check the oven thermometer and measure", 'S'), o("Picture this muffin changing everything", 'N')] },
-    { id: 's16', axis: 'TF', core: 1, rival: 'rattled', text: "The batch burns. The goose peeks in looking ashamed. Feelings are on the line.", opts: [
-      o("Find the cause: temperature, timing or math", 'T'), o("Comfort them: burnt muffins taste fine with love", 'F'),
-      o("Rate each batch and optimize the next", 'T'), o("Laugh it off together so it stings less", 'F')] }
-  ], after: { bg: 'kitchen', rival: 'shadow', glitch: .5,
-    text: "Snow begins to fall... inside the kitchen. \"Colorado,\" the goose whispers. \"That's where it cracks for good.\"",
-    note: "We baked muffins once. Questionable. Delicious. Messy. Ten out of ten." } },
-
-  { name: 'The Icy Trail', bg: 'snow', scenes: [
-    { id: 's17', axis: 'TF', core: 1, text: "On the ice, someone slips for the third time and almost goes down hard. Gg incoming.", opts: [
-      o("Dash over and grab their wing", 'F'), o("Plant your feet and shout clear instructions", 'T'),
-      o("Call out encouragement: you've got this", 'F'), o("Find the path with the least ice and lead them", 'T')] },
-    { id: 's18', axis: 'JP', timed: 1, text: "The ice cracks! The path splits: the planned route or a shortcut across. Ten seconds!", opts: [
-      o("Stay on the planned route", 'J'), o("Take the shortcut and trust your balance", 'P', 1),
-      o("Check the trail map before moving", 'J'), o("Hop across whatever holds", 'P')] },
-    { id: 's19', axis: 'SN', text: "Snow whips sideways. At the summit, something glows: the Chrono Egg.", opts: [
-      o("Follow the glow: it's calling you", 'N'), o("Trust the trail markers beneath your feet", 'S'),
-      o("Picture the whole valley and what comes next", 'N'), o("Watch your footing, one careful step at a time", 'S')] },
-    { id: 's20', axis: 'EI', core: 1, rival: 'shadow', text: "At the summit, the goose and the Glitch face you. Time hangs by a thread.", opts: [
-      o("Quietly reach for the egg", 'I'), o("Shout your plan across the peak", 'E'),
-      o("Hold back and think: what do they want?", 'I'), o("Step forward and announce who you are", 'E')] }
-  ], after: { bg: 'snow', rival: 'unmasked', glitch: .6, egg: 'cracked',
-    text: "The goose lifts its head, and it's a duck, just like you. \"It was never me,\" it says. \"The Glitch fed on both of us.\"",
-    note: "Someone I know slipped on the ice. A lot. I'd still hike anywhere with her." } }
-];
-
+// DUCKS and TWIST live above the data injection so finale.js can Object.assign() onto them
 const DUCKS = {
   ISTJ: ['Knight Duck', "Sworn to the plan and loyal to the flock. You show up every time, and the whole pond sleeps better for it."],
   ISFJ: ['Guardian Duck', "The gentle shield of the pond. You remember everyone's favorite snack and quietly keep the flock safe."],
@@ -217,7 +147,662 @@ const TWIST = {
   P: ["Loose ends frayed the threads.", "Your flexibility found a way through."]
 };
 
-function newRun() { const counts = {}; POLES.forEach(p => counts[p] = 0); return { counts, history: [] }; }
+const CH = [], OUT = {}, FIN = {};
+
+CH[0] = {
+  "name": "The Studio",
+  "bg": "studio",
+  "intro": [
+    {
+      "bg": "studio",
+      "speaker": "PIP",
+      "pip": true,
+      "glitch": 0.3,
+      "prop": "b1_plant",
+      "text": "Okay but also, one rule, and it's a good one: the Glitch eats whatever nobody's told anyone. A memory needs two ducks. So notice things. Say them. Whisper them to a plant. Go!"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s1",
+      "axis": "EI",
+      "text": "The studio music skips and a dozen ducks freeze mid-warmup, all leaving one spot in the front row empty.",
+      "opts": [
+        o("Clap a beat and thaw the whole room", 'E'),
+        o("Loudly ask the room who sits in that spot", 'E'),
+        o("Slip to the corner and study the mirror", 'I'),
+        o("Whisper your theory to a very still duck", 'I')
+      ]
+    },
+    {
+      "id": "s2",
+      "axis": "SN",
+      "core": 1,
+      "shard": [112, 34],
+      "text": "Your reflection runs a full second behind you. The wall clock ticks backward.",
+      "opts": [
+        o("Check the clock, the floor and the door", 'S'),
+        o("Feel the pattern hiding in the echo", 'N'),
+        o("Replay the routine, step by step, for the slip", 'S'),
+        o("Picture the room one second before it broke", 'N')
+      ]
+    },
+    {
+      "id": "s3",
+      "axis": "TF",
+      "text": "The instructor freezes mid-spin: \"Partner switch!\" But one partner is stuck in midair.",
+      "opts": [
+        o("Solve the partner rotation like a puzzle", 'T'),
+        o("Check on the stuck duck first: are they okay?", 'F'),
+        o("Spot the flaw in the order and reshuffle it", 'T'),
+        o("Cheer the others on so nobody feels lost", 'F')
+      ]
+    },
+    {
+      "id": "s4",
+      "axis": "JP",
+      "timed": 1,
+      "rival": "shadow",
+      "text": "The song dies in ten beats. A goose-shaped shadow watches from the doorway, an egg under its wing.",
+      "opts": [
+        o("Plan three moves and commit to them", 'J'),
+        o("Chase the goose and work it out en route", 'P'),
+        o("Mark the exit and count the beats in", 'J'),
+        o("Improvise a move and see who copies", 'P', 1)
+      ]
+    }
+  ],
+  "after": [
+    {
+      "bg": "studio",
+      "speaker": "GOOSE",
+      "rival": "shadow",
+      "glitch": 0.35,
+      "prop": "b1_count",
+      "text": "Five. Four. Three. Two..."
+    },
+    {
+      "bg": "studio",
+      "glitch": 0.35,
+      "egg": { "level": 1, "ticks": 1 },
+      "prop": "b1_trail",
+      "text": "The goose has left a note: \"BOBA SHOP. HURRY.\" and a trail of prints. Your mirror goes dark.",
+      "note": "I met someone at a dance studio once. Best accident I ever stumbled into."
+    }
+  ]
+};
+Object.assign(OUT, {
+  "s1": {
+    "E": "Your noise thaws the ducks. They hop, still curving politely around one empty spot.",
+    "I": "From the quiet corner: twelve ducks and one gap. In the gap, a scrap of blue ribbon."
+  },
+  "s2": {
+    "S": "Only the clock runs backward. Your reflection copies you, a full second late.",
+    "N": "Not an echo. A pattern, like something stepping exactly where you just stood."
+  },
+  "s3": {
+    "T": "The pairs click into order, with one step you never taught. Somebody else knew it.",
+    "F": "The stuck duck floats down and whispers: \"Someone told me exactly what you'd do.\""
+  },
+  "s4": {
+    "J": "You count 5-6-7-8. In the doorway, a second voice counts it a beat after you.",
+    "P": "You improvise and the room follows. The shadow copies your move a beat later."
+  }
+});
+
+
+
+CH[1] = {
+  "name": "The Boba Shop",
+  "bg": "boba",
+  "intro": [
+    {
+      "bg": "boba",
+      "speaker": "NARRATOR",
+      "glitch": 0.35,
+      "prop": "b2_gap",
+      "text": "Memory two: the trendiest boba shop on the internet. A neon menu, a very long line, and a table for two where one cup is only an outline."
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s5",
+      "axis": "SN",
+      "text": "The menu board flickers between flavors that don't exist. The line is very long, and one cup is just an outline.",
+      "opts": [
+        o("Order the favorite you already know you love", 'S'),
+        o("Pick the weirdest flavor on the glitchy board", 'N'),
+        o("Read the real menu, price by price", 'S'),
+        o("Invent a combo nobody has ever dared", 'N')
+      ]
+    },
+    {
+      "id": "s6",
+      "axis": "EI",
+      "rival": "smirk",
+      "text": "Every seat is taken. The goose sips from the next booth, grinning like it knows exactly what you'll say.",
+      "opts": [
+        o("Let the quiet sit while you people-watch", 'I'),
+        o("Tell a wild story to the whole booth", 'E'),
+        o("Study the goose from behind your cup", 'I'),
+        o("Stroll over and say hi to the goose", 'E')
+      ]
+    },
+    {
+      "id": "s7",
+      "axis": "JP",
+      "text": "Your order number keeps changing: 41, 14, 4-1-ish. The pearls drift toward the ceiling.",
+      "opts": [
+        o("Grab whichever cup lands near you", 'P'),
+        o("Stand at the counter and track the number", 'J'),
+        o("Wander and see what the shop shows you", 'P'),
+        o("List what you need before moving an inch", 'J')
+      ]
+    },
+    {
+      "id": "s8",
+      "axis": "TF",
+      "core": 1,
+      "rival": "smirk",
+      "shard": [77, 70],
+      "text": "The goose offers a trade: its last boba for one secret. Its eyes say \"please.\"",
+      "opts": [
+        o("Weigh it: what does each side gain?", 'T'),
+        o("Trust it, it looks like it needs a friend", 'F'),
+        o("Ask for the catch before agreeing", 'T'),
+        o("Split your boba with it, it just feels right", 'F')
+      ]
+    }
+  ],
+  "after": [
+    {
+      "bg": "boba",
+      "speaker": "GOOSE",
+      "rival": { "mood": "smirk", "pale": 0.2 },
+      "glitch": 0.4,
+      "egg": { "level": 2, "ticks": 1, "backward": true },
+      "prop": "b2_notebook",
+      "text": "You'll order the same drink next time. Obviously. ...I'd forgotten how bright it was in here. Forget I said that."
+    },
+    {
+      "bg": "boba",
+      "speaker": "GLITCH",
+      "rival": null,
+      "glitch": 0.45,
+      "egg": { "level": 2, "ticks": 1, "backward": true },
+      "prop": "b2_hic",
+      "text": "Nothing happ- *hic* -ened here."
+    },
+    {
+      "bg": "boba",
+      "speaker": "NARRATOR",
+      "glitch": 0.4,
+      "pip": true,
+      "egg": { "level": 2, "ticks": 2 },
+      "prop": "b2_receipt",
+      "text": "The receipt prints itself: \"ARCADE, 8PM.\" Somewhere, a cabinet says GAME OVER.",
+      "note": "First date was boba. I was too excited to taste anything."
+    }
+  ]
+};
+Object.assign(OUT, {
+  "s5": {
+    "S": "Your sure thing lands in your wing. Beside it, a cup that is only an outline with a blue straw.",
+    "N": "A rainbow combo swirls up from nowhere. Beside it, an outline of a cup with a blue straw."
+  },
+  "s6": {
+    "E": "You bring the noise. The goose laughs a beat after every punchline, like a rerun.",
+    "I": "You watch from behind your cup. The window reflection lags, and the goose mouths along."
+  },
+  "s7": {
+    "J": "The number locks on 41. Your cup slides out on cue, with a second straw already in it.",
+    "P": "A cup bumps your wing at random. Exactly what you wanted, and it has two straws."
+  },
+  "s8": {
+    "T": "You weigh it like a scale. The goose nods: \"Fair. You always do the math first.\"",
+    "F": "Two straws, one boba. The goose goes quiet: \"You always share. I'd forgotten that.\""
+  }
+});
+
+
+
+CH[2] = {
+  "name": "The Arcade",
+  "bg": "arcade",
+  "intro": [
+    {
+      "bg": "arcade",
+      "speaker": "NARRATOR",
+      "text": "Memory three: Round 1, the loudest arcade in the world. One cabinet blinks PLAYER 2: PRESS START at nobody at all.",
+      "glitch": 0.45,
+      "egg": { "level": 3, "ticks": 2 },
+      "prop": "b3_cab"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s9",
+      "axis": "TF",
+      "shard": [94, 52],
+      "text": "A co-op cabinet shows two ducks about to lose. Player 2's bar is flatlining, and nobody is holding that joystick.",
+      "opts": [
+        o("Call the numbers: hit rates, cooldowns", 'T'),
+        o("Cheer for Player 2 like it's the finals", 'F'),
+        o("Study the boss's pattern, then fix the plan", 'T'),
+        o("Take the blame so nobody feels the pressure", 'F')
+      ]
+    },
+    {
+      "id": "s10",
+      "axis": "SN",
+      "text": "A claw machine full of chicken plushies, one in a tiny chef hat. The controls are scrambled and a note says SLOW DOWN.",
+      "opts": [
+        o("Test the controls on a cheap prize first", 'S'),
+        o("Trust your gut and drop it on a hunch", 'N'),
+        o("Count the claw's sway before you drop", 'S'),
+        o("Read the claw's mood: it wants that chef hat", 'N')
+      ]
+    },
+    {
+      "id": "s11",
+      "axis": "JP",
+      "timed": 1,
+      "rival": "rattled",
+      "text": "Tickets pour from every machine and the Glitch is eating the exits. The arcade closes in ten ticks!",
+      "opts": [
+        o("Fling them all into the nearest machine", 'P', 1),
+        o("Beeline to the prize you picked ages ago", 'J'),
+        o("Grab whatever's shiniest and run", 'P'),
+        o("Sort and count them into neat stacks", 'J')
+      ]
+    },
+    {
+      "id": "s12",
+      "axis": "EI",
+      "core": 1,
+      "text": "The big question is next. Your heart flaps like a loose wing, and the one you're asking keeps flickering.",
+      "opts": [
+        o("Announce it in the middle of the arcade", 'E'),
+        o("Pull them aside for a quiet moment", 'I'),
+        o("Hype yourself up and strut right over", 'E'),
+        o("Write it on a prize ticket and hand it over", 'I')
+      ]
+    }
+  ],
+  "after": [
+    {
+      "bg": "arcade",
+      "speaker": "NARRATOR",
+      "rival": { "mood": "rattled", "pale": 0.45 },
+      "glitch": 0.5,
+      "egg": { "level": 3, "ticks": 2 },
+      "prop": "b3_guard",
+      "text": "The Glitch lunges for the Egg, but the goose is faster, wings clamped around it, shaking. The Glitch backs off a step. Thieves don't do that."
+    },
+    {
+      "bg": "arcade",
+      "speaker": "GOOSE",
+      "rival": { "mood": "rattled", "pale": 0.5 },
+      "glitch": 0.4,
+      "egg": { "level": 3, "ticks": 3 },
+      "prop": "b3_count",
+      "text": "Slow down. Last time you rushed this one. ...Five. Four. Three. Two. Two. Two. I always stop at two.",
+      "note": "We hit the arcade right before I asked. Turns out it's a great stalling tactic."
+    }
+  ]
+};
+Object.assign(OUT, {
+  "s9": {
+    "T": "Your logic lands. Player 2's bar climbs, joystick wiggling all by itself. Nobody's there.",
+    "F": "Your support lands. Player 2's bar climbs, joystick wiggling all by itself. Nobody's there."
+  },
+  "s10": {
+    "S": "You test and count the sway. The claw drifts left, like someone is steering it on purpose.",
+    "N": "You trust your gut and drop it perfectly. Behind the glass, a goose exhales: 'Slow. Good.'"
+  },
+  "s11": {
+    "J": "You keep to the plan. The goose counts along, a half-beat behind, voice shaking.",
+    "P": "Tickets everywhere. The goose catches one mid-air and clutches it like it's the last."
+  },
+  "s12": {
+    "E": "You go big and the whole arcade goes quiet, then cheers. A faint outline cheers loudest.",
+    "I": "Quiet words, and a small heart-ticket changes wings. A faint outline holds it with both."
+  }
+});
+
+
+
+CH[3] = {
+  "name": "The Muffin Kitchen",
+  "bg": "kitchen",
+  "intro": [
+    {
+      "bg": "kitchen",
+      "glitch": 0.45,
+      "prop": "b4_gap",
+      "shard": [92, 71],
+      "text": "Memory four: a kitchen, a batch of chocolate protein muffins, a recipe card half erased. Two mixing bowls, one only an outline, with a blue ribbon tied around it."
+    },
+    {
+      "bg": "kitchen",
+      "speaker": "GOOSE",
+      "rival": "help",
+      "glitch": 0.4,
+      "prop": "b4_taps",
+      "text": "Eleven minutes. Thirty-one grams of protein. Fold, don't stir. ...Why do I know that? And they smelled like something. What did they smell like? *tap tap*"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s13",
+      "axis": "JP",
+      "text": "The recipe card is half erased, and the oven clock is running backward.",
+      "opts": [
+        o("Follow the card step by step, in order", 'J'),
+        o("Line up every ingredient before you start", 'J'),
+        o("Toss in whatever feels right", 'P'),
+        o("Swap in a surprise ingredient, just to see", 'P')
+      ]
+    },
+    {
+      "id": "s14",
+      "axis": "EI",
+      "rival": "help",
+      "text": "The kitchen is too small for you, a goose and a glitch, and duck friends keep dropping in from time loops.",
+      "opts": [
+        o("Hand out chef hats. It's a baking party now", 'E'),
+        o("Narrate the bake like a cooking show", 'E'),
+        o("Close the door and mix in peace", 'I'),
+        o("Bake a small batch in the quiet corner", 'I')
+      ]
+    },
+    {
+      "id": "s15",
+      "axis": "SN",
+      "rival": "help",
+      "text": "The oven timer counts backward and the batter glows faintly. In the oven door, two ducks.",
+      "opts": [
+        o("Taste a bit and check the texture", 'S'),
+        o("Check the thermometer and measure", 'S'),
+        o("Wonder what flavor could stop time", 'N'),
+        o("Picture the finished muffins and how they feel", 'N')
+      ]
+    },
+    {
+      "id": "s16",
+      "axis": "TF",
+      "core": 1,
+      "rival": "help",
+      "text": "The batch burns. The Glitch lunges for the smoke, and the goose slides a clean pan across the counter.",
+      "opts": [
+        o("Trace the cause: heat, timing, math", 'T'),
+        o("Rate each batch and fix the next one", 'T'),
+        o("Share the burnt one anyway, with love", 'F'),
+        o("Laugh it off so nobody feels bad", 'F')
+      ]
+    }
+  ],
+  "after": [
+    {
+      "bg": "kitchen",
+      "speaker": "GLITCH",
+      "rival": "help",
+      "glitch": 0.5,
+      "prop": "b4_choc",
+      "text": "Nothing ha- mm. What is that? ...Chocolate?"
+    },
+    {
+      "bg": "kitchen",
+      "rival": "help",
+      "glitch": 0.5,
+      "egg": { "level": 4, "ticks": 4 },
+      "prop": "b4_snow",
+      "text": "Snow begins to fall... inside the kitchen. \"Colorado,\" the goose whispers. \"That's where it cracks for good.\"",
+      "note": "We baked muffins once. Questionable. Delicious. Messy. Ten out of ten."
+    }
+  ]
+};
+Object.assign(OUT, {
+  "s13": {
+    "J": "Step by step, the blanks fill in, in the goose's tidy handwriting. It even underlines.",
+    "P": "You toss in what feels right. The card catches up, in the goose's tidy handwriting: 'a bit.'"
+  },
+  "s14": {
+    "E": "Everyone gets a job: chef hats, flour, a party. One apron stays on the hook, waiting.",
+    "I": "The door clicks shut. The goose sits by you and taps your wing: two for yes."
+  },
+  "s15": {
+    "S": "You taste, then check the thermometer: dead on. The goose nods before you finish reading.",
+    "N": "You dream up the finished muffins. The batter brightens; the goose sniffs: 'Chocolate!'"
+  },
+  "s16": {
+    "T": "Heat, timing, math: the dial. The goose is already holding the right pan. Suspiciously ready.",
+    "F": "You laugh and share the burnt one. The Glitch tries a bite and gets chocolate on its eye."
+  }
+});
+
+
+
+CH[4] = {
+  name: "The Icy Trail",
+  bg: "snow",
+  intro: [
+    { bg: "snow", speaker: "NARRATOR", glitch: 0.45, prop: "b5_prints", shard: [104, 93],
+      text: "Memory five: an icy trail in Colorado. Ahead of your prints, a second set begins exactly where yours end: same stride, a nick in the left foot." },
+    { bg: "snow", speaker: "GLITCH", glitch: 0.5, prop: "b5_ask",
+      text: "Nothing happened here...?" }
+  ],
+  scenes: [
+    {
+      id: "s17", axis: "TF", core: 1,
+      text: "On the ice, someone slips for the third time and almost goes down hard. Gg incoming.",
+      opts: [
+        o("Call the steps: plant, shift, breathe", 'T'),
+        o("Grab their wing and hold on tight", 'F'),
+        o("Scout the grippiest line and lead them", 'T'),
+        o("Make them laugh so they stop clenching", 'F')
+      ]
+    },
+    {
+      id: "s18", axis: "JP", timed: 1,
+      text: "The ice cracks and the path splits: the planned route or the shortcut across. Ten seconds!",
+      opts: [
+        o("Stick to the route you planned", 'J'),
+        o("Take the shortcut and trust your balance", 'P', 1),
+        o("Check the map before taking a step", 'J'),
+        o("Hop across whatever holds", 'P')
+      ]
+    },
+    {
+      id: "s19", axis: "SN",
+      text: "Snow whips sideways. In the summit ice, your reflection is exactly in sync, which is wrong.",
+      opts: [
+        o("Check the facts: prints, nick, wing size", 'S'),
+        o("Feel what's off before you can name it", 'N'),
+        o("Test the ice with one careful boot", 'S'),
+        o("Wonder who exactly is in that reflection", 'N')
+      ]
+    },
+    {
+      id: "s20", axis: "EI", core: 1, rival: "rattled",
+      text: "At the summit the goose and the Glitch both turn to you. The Egg between them is cracking.",
+      opts: [
+        o("Announce yourself, loud and proud", 'E'),
+        o("Hang back and read them both", 'I'),
+        o("Ask them both what is going on, out loud", 'E'),
+        o("Edge closer quietly and watch the egg", 'I')
+      ]
+    }
+  ],
+  after: [
+    { bg: "snow", speaker: "NARRATOR", rival: { mood: "unmasked", pale: 1 }, glitch: 0.6,
+      egg: { level: 5, ticks: 4 }, prop: "b5_slip",
+      text: "Your feet go out on the last switchback: one long second of all sky. Then a wing the same size as yours hauls you back, and the ice keeps a nick of your left foot.",
+      note: "Someone I know slipped on the ice. A lot. I'd still hike anywhere with her." },
+    { bg: "snow", speaker: "GOOSE", rival: { mood: "unmasked", pale: 1 }, glitch: 0.6,
+      egg: { level: 5, ticks: 5 }, prop: "b5_taps", btn: "Take the Egg",
+      text: "Got you. I've got you. ...Take the Egg. I can't make my wings open." }
+  ]
+};
+Object.assign(OUT, {
+  s17: {
+    T: "Plant, shift, breathe. They stand, and the ice keeps one tiny nick of their left foot.",
+    F: "You grab their wing and they stand, laughing a shaky laugh you'd know anywhere."
+  },
+  s18: {
+    J: "You brace on route. A second set of prints lands beside yours, step for step.",
+    P: "You hop the shortcut. A second set of prints lands beside yours, a beat late."
+  },
+  s19: {
+    S: "You check. Prints, nick, ice: everything matches. Everything. You'll think about it later.",
+    N: "The reflection isn't copying you anymore. It just stands there, quietly keeping you company."
+  },
+  s20: {
+    E: "You call out. The Glitch freezes mid-lunge: nobody has asked it anything in ages.",
+    I: "You read them both: the goose is gripping, the Glitch is waiting. Neither is attacking."
+  }
+});
+
+
+
+// FIN: finale / reveal content (story bible is canon)
+FIN.introText = "A goose has the Chrono Egg. A magenta Glitch is eating five of your memories, one room at a time, and insists nothing happened here. A very small duck says you can prove it wrong.";
+
+FIN.prologue = [
+  { bg: 'void', egg: { level: 1, ticks: 0, backward: true }, glitch: .3, prop: 'f_table',
+    text: "On a plain table sits the Chrono Egg. Inside it, five days that really happened. Its clock ticks backward. That is not a good sign." },
+  { bg: 'void', speaker: 'PIP', pip: true, egg: { level: 1, ticks: 0, backward: true },
+    text: "Hi! I'm Pip. I made the Egg. A goose has run off with it, and a magenta thing called the Glitch is eating what's inside. I can't go in, so, um. You?" },
+  { bg: 'void', speaker: 'GLITCH', glitch: .5, prop: 'f_glitch', btn: "Dive in", egg: { level: 1, ticks: 0, backward: true },
+    text: "Nothing happened here." }
+];
+
+FIN.revealBeats = [
+  { bg: 'snow', prop: 'f_prints', rival: { mood: 'unmasked', pale: .8 }, glitch: .5,
+    text: "Two sets of prints. Same size, same stride, same nick in the left foot. You got yours ten seconds ago." },
+  { bg: 'snow', speaker: 'GOOSE', prop: 'f_reflect', rival: { mood: 'unmasked', pale: .8 },
+    text: "A second behind. That's me: your reflection, your footprints, the beat after every move you make. I stayed in the shadows because I look like how this ends. I'm not your enemy. I'm your later." },
+  { bg: 'snow', speaker: 'GOOSE', rival: { mood: 'unmasked', pale: .8 }, egg: { level: 5, ticks: 5 },
+    text: "I count down what I've got left. Five. Four. Three. Two. Then I stop, because one is what a memory is when only one duck still holds it." },
+  { bg: 'void', speaker: 'GOOSE', prop: 'f_notebook', rival: { mood: 'unmasked', pale: .9 },
+    text: "Every memory had a second duck: a cup, a joystick, a bowl, a pair of prints. I couldn't tell you who. All I kept was this ribbon, and I've carried it for years." },
+  { bg: 'void', speaker: 'GOOSE', rival: { mood: 'unmasked', pale: .9 }, egg: { level: 5, ticks: 5 },
+    text: "It started with a sentence. \"We'll always remember this.\" Someone said it, meant it, and never said it again. That's all the Glitch ever eats: what only one duck still holds. It takes two to keep a memory." },
+  { bg: 'void', speaker: 'GLITCH', glitch: .6, prop: 'f_glitch', btn: "Everything happened here.", rival: { mood: 'unmasked', pale: .9 }, egg: { level: 5, ticks: 5 },
+    text: "Nothing happened here." },
+  { bg: 'void', glitch: .3, prop: 'f_glitchSleepy', rival: { mood: 'unmasked', pale: .9 }, egg: { level: 5, ticks: 5 },
+    text: "Your voice is tiny in all this quiet. It carries. The goose says it too, a beat after you. Then a third voice, from inside the Egg: \"Everything happened here.\"" },
+  { bg: 'void', speaker: 'PIP', pip: true, prop: 'f_outlines', rival: null,
+    text: "Okay but also: the empty seat in every room? That was me. I said \"we'll always remember this\" and meant it so hard I forgot to do it. The Glitch ate me first. That's why I'm small." }
+];
+
+FIN.twistTitle = "THE TWIST";
+FIN.twistSub = "THE GOOSE WAS YOUR LATER";
+FIN.twistIntro = "Everyone keeps a memory differently, and everyone loses one differently. Here's how you did both:";
+
+Object.assign(TWIST, {
+  E: ["You spread each memory so wide that no one held it still.", "You said it out loud, and loud things are hard to eat."],
+  I: ["You kept each memory so close that nobody else could hold it.", "You noticed the small things, and spotted the gap in every room."],
+  S: ["You trusted what you could see, and the Glitch fed on what you couldn't.", "You anchored every room in real things: a cup, a clock, a footprint."],
+  N: ["You chased the meaning and left the details lying around.", "You felt the pattern, and followed it straight to the goose."],
+  T: ["You asked what was true first, and a few feelings slipped through unasked.", "You never bought a single lullaby. Logic gave the Glitch no way in."],
+  F: ["You looked after everyone's feelings and ran a tab on your own.", "You kept every feeling fed, and fed feelings don't fade."],
+  J: ["You held the plan so tightly it snapped when the floor disappeared.", "Your plan was a handrail. You never lost the thread."],
+  P: ["You let things drift, and a few memories drifted with them.", "You found a way through when the map ran out."]
+});
+
+FIN.gooseReflect = (run, ctx) => {
+  const c = (ctx && ctx.counts) || (run && run.counts) || {};
+  const hist = (ctx && ctx.history) || (run && run.history) || [];
+  const LINES = {
+    E: "You said everything out loud, even to the claw machine. I thought it was noise. It was a memory with an audience.",
+    I: "You went quiet and watched, every time. I thought you'd forgotten. You were keeping it whole.",
+    S: "You trusted what was in front of you: the clock, the cup, the footprint. The room stopped sliding when you did.",
+    N: "You felt the pattern before the proof. That's how you found me before I found you.",
+    T: "You asked what was true before what was kind. The Glitch has one line, and you fact-checked it.",
+    F: "You asked how everyone was feeling before anything else. I wrote down the facts and lost the feelings. You kept both.",
+    J: "You made a plan for a place that kept deleting its own floor. And it held. I would have bet against it.",
+    P: "You made it up as you went, and the ice held. I will never be ready for that. Please keep doing it."
+  };
+  const out = ["I picked the same options you did. That's how I knew you'd get here."];
+  let best = -1, lead = null;
+  ['EI', 'SN', 'TF', 'JP'].forEach(ax => {
+    const a = c[ax[0]] || 0, b = c[ax[1]] || 0, m = Math.abs(a - b);
+    if (m > best) { best = m; lead = a >= b ? ax[0] : ax[1]; }
+  });
+  out.push(best <= 1 ? "You split down the middle on everything. I never could. I think that's why you got further." : LINES[lead]);
+  const h18 = hist.find(h => h && h.id === 's18');
+  if (h18) {
+    if (h18.p === 'J') out.push("On the ice you braced. So did I. The ice took the nick anyway.");
+    else if (h18.p === 'P') out.push("On the ice you took the shortcut. So did I. Same nick, same grin.");
+  } else if (ctx && ctx.shards >= 5) out.push("You found every echo. I only ever found three. You went further than I did.");
+  return out;
+};
+
+FIN.shardEchoes = [
+  "A red Mario shirt, front row. At the back, someone is already smiling at it.",
+  "Two cups. Somebody is too excited to taste theirs.",
+  "A joystick wiggles by itself. Somewhere, two chickens get chefed.",
+  "Questionable batter. Excellent company.",
+  "Slip number three. Somebody is already reaching. They're always already reaching."
+];
+
+FIN.shardLine = (n) => {
+  if (n <= 0) return "You didn't find any shards. That's okay. The big pieces were out in the open. The small ones will keep.";
+  if (n <= 2) return "You found a few echoes. Enough to hear that somebody was always standing next to you.";
+  if (n <= 4) return "You found most of the echoes. You can almost see the shape of who was standing there.";
+  return "You found every echo. So here's what I saved: the Glitch's first bite was a sentence. \"We'll always remember this.\" Nobody said it again. Now somebody has.";
+};
+
+FIN.hatchText = "The Chrono Egg warms in your wings. Nothing is escaping. Something is arriving: the duck these five memories were always going to make.";
+FIN.resultNote = (type) => "Five memories, told out loud, hatched " + (/^[AEIOU]/.test(DUCKS[type][0]) ? "an " : "a ") + DUCKS[type][0] + ". The goose looks at the shell, then at you. \"Obviously,\" it says, and for once it's right.";
+
+FIN.lockLead = "Pip steps out of the frame and looks right at you. \"The Glitch's first bite was one name only two ducks ever said. If you were there, say it. If not, that's okay. Leave it locked.\"";
+FIN.skipLabel = "I wasn't there. Leave it locked.";
+
+FIN.unlockBeats = [
+  { bg: 'void', egg: { level: 5, ticks: 5 }, hideDuck: true, rival: null,
+    text: "You say the name. The Egg goes very still, like a room that has just been listened to." },
+  { bg: 'void', speaker: 'GLITCH', glitch: .1, egg: { level: 5, ticks: 5 }, prop: 'f_nightlight', hideDuck: true,
+    text: "...Oh. Everything happened here." },
+  { bg: 'void', speaker: 'GOOSE', pip: false, prop: 'f_pipGrow', hideDuck: true, rival: null, flash: true,
+    text: "There you are." },
+  { bg: 'void', speaker: 'GOOSE', prop: 'f_one', hideDuck: true, rival: null,
+    text: "Five. Four. Three. Two. ...One. Huh. It's just a number when somebody's standing next to you." },
+  { bg: 'void', btn: "Show me", prop: 'f_lights', egg: { level: 5, ticks: 5, gold: true },
+    text: "Five lights climb out of the Egg, one for each memory, and land on five badges. This time somebody's standing next to you in every one." }
+];
+
+Object.assign(CFG.badges[0], { title: "PLAYER 2 HAS ENTERED", cap: "Restored: one legendary Mario shirt at the realest of studios, and the duck beside it. +1 UP." });
+Object.assign(CFG.badges[1], { title: "DOUBLE SIP", cap: "Restored: two drinks, one first date, zero regrets. Trendiest of bobas, now with the second straw." });
+Object.assign(CFG.badges[2], { title: "HIGH SCORE", cap: "Restored: Round 1, chickens chefed, tickets earned, and Player 2 finally pressing start." });
+Object.assign(CFG.badges[3], { title: "PROTEIN POWER-UP", cap: "Restored: two bowls, one batch of chocolate protein muffins. +10 strength, +100 spicy." });
+Object.assign(CFG.badges[4], { title: "ICE SURVIVOR", cap: "Restored: the whole first hike, every slip, and the second set of prints beside yours. One tough egg." });
+
+FIN.coupleBeats = [
+  { bg: 'festival', speaker: 'PIP', pip: true, prop: 'f_gooseTint', egg: { level: 5, ticks: 5, gold: true },
+    text: "Check the Egg. Check it anywhere. If it ticks forward, you're awake." },
+  { bg: 'festival', prop: 'f_egg6', hideDuck: true, egg: { level: 5, ticks: 6, gold: true },
+    text: "It ticks forward. Warm, steady, a little off-beat, like somebody's heart. Five ticks are gold. A sixth is empty, waiting." },
+  { bg: 'festival', speaker: 'PIP', pip: true, prop: 'f_ticket', egg: { level: 5, ticks: 6, gold: true },
+    text: "That one's for a memory that hasn't happened yet. Is this real? Okay but also, only one way to find out: a real trail, a real weekend. It's on the ticket." },
+  { bg: 'festival', speaker: 'GOOSE', prop: 'f_notebook6', hideDuck: true, rival: { mood: 'unmasked', tint: 'you', egg: false },
+    text: "I wrote it down. Item six: BIG BEND. MLK WEEKEND. Witnesses required: two. ...Obviously." },
+  { bg: 'festival', speaker: 'PIP', pip: true, egg: { level: 5, ticks: 6, gold: true }, rival: { mood: 'unmasked', tint: 'you', egg: false }, btn: "Read Pip's letter",
+    text: "Nothing happened here. Everything did. I wrote you something. It isn't part of the game." }
+];
+
+FIN.skipEnding = {
+  title: "THE TIMELINE IS SEALED",
+  text: "You didn't have the name, and that's okay: you weren't there. But you were a witness to five rooms, and that counts. The Glitch is asleep in the Egg's crack. The goose stops lagging and settles into your reflection. It still stops counting at two. A few doors stay locked, politely, for the ones who were there. Pip is still small and still waving. Pip's Egg has a sixth empty slot: fill it with something that hasn't happened yet, and bring someone you'd hate to forget. Nothing happened here. Everything did."
+};
+
+FIN.shareText = "A goose stole the Chrono Egg, and the twist got me. Find out which duck you are in Duck Quest.";
+
+
+const CHAPTERS = CH;
+
+function newRun() { const counts = {}; POLES.forEach(p => counts[p] = 0); return { counts, history: [], shards: 0, found: {}, hatched: false }; }
 function axisState(run, ax) {
   const a = run.counts[ax[0]], b = run.counts[ax[1]];
   return { a, b, n: a + b, done: Math.max(a, b) >= WIN, lead: a > b ? ax[0] : b > a ? ax[1] : null };
@@ -263,6 +848,7 @@ const TINT = { NT: '#c9a7ff', NF: '#8fe3b0', SJ: '#8ecbff', SP: '#ffb27a' };
 const $ = s => document.querySelector(s);
 const cv = $('#cv'), ctx = cv.getContext('2d'), panel = $('#panel');
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const vib = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { } };
 let g = ctx;                      // current drawing context (art helpers draw to g)
 let T = 0;                        // current frame time
 const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(Math.round(x), Math.round(y), w, h); };
@@ -335,33 +921,122 @@ function drawDuck(x, y, s, o = {}) {
   const put = (c, r, col) => R(x + (o.flip ? 15 - c : c) * s, y + r * s, s, s, col);
   for (let r = 0; r < 16; r++) for (let c = 0; c < 16; c++) { const ch = DUCK[r][c]; if (ch !== '.') put(c, r, pal[ch]); }
   (o.acc || []).forEach(a => ACC[a] && ACC[a](put));
-  if (o.bow) { [[8,-1],[8,0],[10,-1],[10,0]].forEach(([c, r]) => put(c, r, o.bow)); put(9, 0, '#fff'); }
+  if (o.bow) {
+    if (o.bowTail) { // Pip's bow: tall left tail, right tail torn short (or matched once the ribbon is tied)
+      [[8, -2], [8, -1], [8, 0]].forEach(([c, r]) => put(c, r, o.bow));
+      (o.bowTail === 'full' ? [[10, -2], [10, -1], [10, 0]] : [[10, 0]]).forEach(([c, r]) => put(c, r, o.bow));
+      put(9, 0, '#d6e8ff');
+    } else { [[8, -1], [8, 0], [10, -1], [10, 0]].forEach(([c, r]) => put(c, r, o.bow)); put(9, 0, '#fff'); }
+  }
   g.restore();
+}
+/* Pip: tiny white duck, blue bow with the right tail torn short.
+   o: {tied (both tails match, ribbon tied on), outline (faint outline duck for gap props), alpha, flip, still, t} */
+function drawPip(x, y, s, o = {}) {
+  const t = o.t || 0;
+  if (!o.outline) { drawDuck(x, y, s, { tint: '#ffffff', bow: '#59a0ff', bowTail: o.tied ? 'full' : 'torn', t, still: o.still, flip: o.flip }); return; }
+  y += o.still ? 0 : Math.round(Math.sin(t / 300));
+  g.save(); g.globalAlpha = o.alpha != null ? o.alpha : .45 + .2 * Math.sin(t / 500);
+  const fx = c => x + (o.flip ? 15 - c : c) * s;
+  for (let r = 0; r < 16; r++) for (let c = 0; c < 16; c++) {
+    if (DUCK[r][c] === '.') continue;
+    const e = (dr, dc) => { const rr = r + dr, cc = c + dc; return rr < 0 || rr > 15 || cc < 0 || cc > 15 || DUCK[rr][cc] === '.'; };
+    if (e(-1, 0) || e(1, 0) || e(0, -1) || e(0, 1)) R(fx(c), y + r * s, s, s, '#ffffff');
+  }
+  [[8, -2], [8, -1], [8, 0], [10, 0]].concat(o.tied ? [[10, -2], [10, -1]] : []).forEach(p => R(fx(p[0]), y + p[1] * s, s, s, '#59a0ff'));
+  R(fx(9), y, s, s, '#d6e8ff');
+  g.restore();
+}
+/* ---- rival (the goose) ---- */
+const LAVENDER = '#c9a7ff', mixCache = {};
+function mixHex(a, b, k) { // blend hex a toward hex b by k (0..1), cached
+  if (k <= 0) return a; const key = a + b + Math.round(k * 24); if (mixCache[key]) return mixCache[key];
+  const A = parseInt(a.slice(1), 16), B = parseInt(b.slice(1), 16), m = sh => Math.round(((A >> sh) & 255) * (1 - k) + ((B >> sh) & 255) * k);
+  return mixCache[key] = `rgb(${m(16)},${m(8)},${m(0)})`;
+}
+function heroTint() { try { return duckFromType(resultType(run)).tint; } catch (e) { return '#ffd23f'; } }
+// extras on the goose (logical px; the 32px-wide sprite faces left): the Chrono Egg under one wing, a tiny notebook under the other, the blue ribbon scrap at the neck
+function rivalExtras(r, x, y, uh) {
+  if (r.egg !== false && !view.egg) {
+    const ex = x + (uh ? 13 : 10), ey = y + 22;
+    R(ex - 1, ey - 1, 8, 7, 'rgba(255,230,160,.22)');
+    [[1, 0, 4], [0, 1, 6], [0, 2, 6], [0, 3, 6], [1, 4, 4]].forEach(([dx, dy, w]) => R(ex + dx, ey + dy, w, 1, '#fff1c9'));
+    R(ex + 5, ey + 1, 1, 3, '#e0a82e'); R(ex + 2, ey + 2, 2, 1, Math.sin(T / 400) > 0 ? '#59e0ff' : '#ff6fb5');
+    R(ex + 1, ey - 1, 5, 2, uh ? '#d9bdff' : '#55496f'); // the wing over the top half
+  }
+  if (r.notebook) { const nx = x + (uh ? 25 : 24), ny = y + (uh ? 19 : 18); R(nx, ny, 4, 5, '#fff1c9'); R(nx, ny, 1, 5, '#e0a82e'); R(nx + 1, ny + 1, 2, 1, '#2b1d3a'); R(nx + 1, ny + 3, 2, 1, '#9a8f7a'); }
+  if (r.ribbon) { const bx = x + (uh ? 9 : 11), by = y + (uh ? 14 : 12); R(bx, by, 2, 3, '#59a0ff'); R(bx + 3, by, 2, 3, '#59a0ff'); R(bx + 2, by + 1, 1, 1, '#9cc8ff'); R(bx + 4, by + 3, 1, 2, '#59a0ff'); }
 }
 function drawRival(r, t) {
   const x = r.x ?? 102, s = 2; let y = r.y ?? 58;
-  if (r.mood === 'unmasked') { drawDuck(x, y, s, { tint: '#c9a7ff', flip: true, t, bow: '#59e0ff' }); return; }
-  if (r.mood === 'shadow' && !RM && Math.sin(t / 90) > .8) return;
+  const pale = clamp(r.pale || 0, 0, 1);
+  g.globalAlpha = 1;
+  if (r.vanish != null && view.beatT0 != null) { const a = clamp(1 - (t - view.beatT0 - r.vanish) / 700, 0, 1); if (a <= 0) return; g.globalAlpha = a; }
+  if (r.alpha != null) g.globalAlpha *= clamp(r.alpha, 0, 1);
+  const tn = r.tint === 'you' ? heroTint() : r.tint;
+  if (r.mood === 'unmasked') {
+    drawDuck(x, y, s, { tint: tn || mixHex('#ffd23f', LAVENDER, pale), flip: true, t });
+    rivalExtras(r, x, y + Math.round(Math.sin(t / 300)), true); g.globalAlpha = 1; return;
+  }
+  if (r.mood === 'shadow' && !RM && Math.sin(t / 90) > .8) { g.globalAlpha = 1; return; }
   const eye = { smirk: '#59e0ff', shadow: '#ff6fb5', rattled: '#ffd23f', help: '#7dffb0' }[r.mood] || '#59e0ff';
-  const pal = { G: '#38304f', H: '#55496f', O: '#ff5a3c', C: eye };
+  const base = r.mood === 'shadow' ? ['#1a1230', '#2a2048'] : ['#38304f', '#55496f'];
+  const pal = tn ? { G: tn, H: light(tn), O: '#ff5a3c', C: eye } : { G: mixHex(base[0], LAVENDER, pale), H: mixHex(base[1], LAVENDER, pale), O: mixHex('#ff5a3c', LAVENDER, pale * .5), C: eye };
   y += Math.round(Math.sin(t / 380));
   g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x + 2 * s, y + 16 * s, 12 * s, s);
   for (let rr = 0; rr < 16; rr++) for (let c = 0; c < 16; c++) { const ch = GOOSE[rr][c]; if (ch !== '.') R(x + (15 - c) * s, y + rr * s, s, s, pal[ch]); }
+  rivalExtras(r, x, y, false);
   if (r.mood === 'rattled') R(x + 13 * s, y + 1 * s, s, 2 * s, '#59e0ff');
   if (r.mood === 'help') R(x - 6, y + 18, 12, s, '#55496f');
+  g.globalAlpha = 1;
 }
+/* ---- the Chrono Egg ---- */
 const EGG_W = [4, 8, 10, 12, 14, 14, 16, 16, 16, 16, 16, 16, 14, 14, 12, 10, 8, 4];
-function drawEgg(cx, top, s, shake, crack, t) {
-  const ox = shake ? Math.round(Math.sin(t / 35) * shake) : 0;
+const CRACK_Z = [0, 1, 1, 0, -1, -1];
+/* drawEgg(cx, top, s, shake, crack 0..1, t, opt?)
+   opt: {level 1..5 zigzag crack (overrides crack), ticks 0..6, gold, backward, pulse, up:{i,t0}}.
+   Six clock marks ring the face: ticks 1..5 light that many (dim blue, or gold), ticks 6 = five lit + a hollow sixth slot. */
+function drawEgg(cx, top, s, shake, crack, t, op) {
+  op = op || {};
+  const ox = shake ? Math.round(Math.sin(t / 35) * shake) : 0, ccx = cx + ox;
+  if (op.pulse) { // slow 1 Hz heartbeat halo (not a scale: pixel art stays crisp)
+    const p = (t % 1000) / 1000, amp = RM ? .35 : Math.max(0, 1 - Math.abs(p - .1) * 7, (1 - Math.abs(p - .32) * 7) * .6);
+    const rgb = op.gold ? '255,210,63' : op.backward ? '255,111,181' : '255,241,201', a1 = `rgba(${rgb},${(.06 + .12 * amp).toFixed(3)})`, a2 = `rgba(${rgb},${(.12 + .22 * amp).toFixed(3)})`;
+    EGG_W.forEach((w, i) => { const l = ccx - w * s / 2; R(l - s * 2, top + i * s, (w + 4) * s, s, a1); R(l - s, top + i * s, (w + 2) * s, s, a2); });
+    R(ccx - 3 * s, top - s, 6 * s, s, a2); R(ccx - 2 * s, top + 18 * s, 4 * s, s, a2);
+  }
   EGG_W.forEach((w, i) => {
-    const l = cx + ox - w * s / 2;
+    const l = ccx - w * s / 2;
     R(l, top + i * s, w * s, s, '#fff1c9'); R(l, top + i * s, s, s, '#e0a82e'); R(l + w * s - s, top + i * s, s, s, '#e0a82e');
   });
-  R(cx + ox - 4 * s, top, 8 * s, s, '#e0a82e'); R(cx + ox - 2 * s, top + 17 * s, 4 * s, s, '#e0a82e');
-  R(cx + ox - 3 * s, top + 7 * s, 6 * s, 6 * s, '#fff'); R(cx + ox - 2 * s, top + 8 * s, 4 * s, 4 * s, '#2b1d3a');
-  R(cx + ox, top + 8 * s, s, 2 * s, '#59e0ff'); R(cx + ox, top + 9 * s, 2 * s, s, '#ff6fb5');
+  R(ccx - 4 * s, top, 8 * s, s, '#e0a82e'); R(ccx - 2 * s, top + 17 * s, 4 * s, s, '#e0a82e');
+  if (op.level) { // zigzag crack, grows with the chapter
+    const L = [4, 7, 10, 14, 18][clamp(op.level, 1, 5) - 1], px = (dx, dy, c) => R(ccx + dx * s - s / 2, top + dy * s, s, s, c);
+    for (let k = 0; k < L; k++) px(CRACK_Z[k % 6], 1 + k, k % 2 ? '#59e0ff' : '#ff6fb5');
+    if (op.level >= 4) [[2, 6], [3, 7], [4, 7]].forEach(([dx, dy], k) => px(dx, dy, k % 2 ? '#59e0ff' : '#ff6fb5'));
+    if (op.level >= 5) [[-2, 10], [-3, 11], [-4, 11]].forEach(([dx, dy], k) => px(dx, dy, k % 2 ? '#ff6fb5' : '#59e0ff'));
+  }
+  R(ccx - 3 * s, top + 7 * s, 6 * s, 6 * s, '#fff'); R(ccx - 2 * s, top + 8 * s, 4 * s, 4 * s, '#2b1d3a');
+  const cyy = top + 10 * s, dir = op.backward ? -1 : 1, ha = dir * t / 650, hb = dir * t / 7800;
+  R(ccx + Math.cos(ha) * 1.5 * s - s / 2, cyy + Math.sin(ha) * 1.5 * s - s / 2, s, s, '#59e0ff');
+  R(ccx + Math.cos(hb) * .8 * s - s / 2, cyy + Math.sin(hb) * .8 * s - s / 2, s, s, '#ff6fb5');
+  R(ccx - s / 2, cyy - s / 2, s, s, '#ffd23f');
+  const nt = op.ticks;
+  if (nt != null) {
+    for (let k = 0; k < 6; k++) {
+      if (k === 5 && nt < 6) continue;
+      const a = -1.5708 + k * 1.0472, px = Math.round(ccx + Math.cos(a) * 5 * s), py = Math.round(cyy + Math.sin(a) * 5 * s);
+      if (k === 5) { const b = Math.sin(t / 500) > 0 ? '#e0a82e' : '#ffd23f'; R(px - s, py - s, 2 * s, 1, b); R(px - s, py + s - 1, 2 * s, 1, b); R(px - s, py - s, 1, 2 * s, b); R(px + s - 1, py - s, 1, 2 * s, b); continue; }
+      if (k < nt) {
+        if (op.gold) { R(px - s, py - s, 2 * s, 2 * s, 'rgba(255,210,63,.3)'); R(px - s / 2, py - s / 2, s, s, '#ffd23f'); R(px - s / 2, py - s / 2, 1, 1, '#fff7c0'); }
+        else { R(px - s / 2, py - s / 2, s, s, '#6f86c4'); R(px - s / 2, py - s / 2, 1, 1, '#b9c7f5'); }
+        if (op.up && op.up.i === k && !RM) { const age = performance.now() - op.up.t0; if (age < 1500) { const r = 1 + age / 160; g.globalAlpha = 1 - age / 1500; R(px - r, py, 2 * r + 1, 1, '#b9c7f5'); R(px, py - r, 1, 2 * r + 1, '#b9c7f5'); g.globalAlpha = 1; } }
+      } else R(px - s / 2, py - s / 2, s, s, 'rgba(150,110,40,.4)');
+    }
+  }
+  if (op.level) return;
   const n = Math.floor(clamp(crack, 0, 1) * 10);
-  for (let k = 0; k < n; k++) R(cx + ox + ((k % 3) - 1) * s, top + 1 * s + k * s, s, s, k % 2 ? '#59e0ff' : '#ff6fb5');
+  for (let k = 0; k < n; k++) R(ccx + ((k % 3) - 1) * s, top + 1 * s + k * s, s, s, k % 2 ? '#59e0ff' : '#ff6fb5');
 }
 function particleBurst(x, y, n, cols) {
   for (let i = 0; i < n; i++) PART.push({ x, y, vx: (Math.random() - .5) * 80, vy: -Math.random() * 60 - 10, life: 1.3, c: cols[i % cols.length] });
@@ -448,22 +1123,1327 @@ BG.festival = t => {
   if (!RM) for (let i = 0; i < 26; i++) R((rnd(i) * 160 + Math.sin(t / 500 + i) * 5) % 160, (rnd(i + 30) * 130 + t * .03 * (1 + i % 3)) % 130 - 5, 2, 2, CONF[i % 5]);
 };
 
+/* ---------- per-scene props: art that matches each scene's text. st = chosen pole once the player has answered ---------- */
+const EM = {
+  E: { r: ['00100', '00100', '00100', '00000', '00100'], c: '#e8483c' }, I: { r: ['00000', '00000', '00000', '00000', '10101'], c: '#6b5bd6' },
+  S: { r: ['01100', '10010', '10010', '01100', '00011'], c: '#3b78d0' }, N: { r: ['01110', '10001', '10001', '01110', '00100'], c: '#e0a82e' },
+  T: { r: ['10101', '01110', '11011', '01110', '10101'], c: '#555' }, F: { r: ['01010', '11111', '11111', '01110', '00100'], c: '#ff4f87' },
+  J: { r: ['00001', '00010', '10100', '01000', '00000'], c: '#2fa84f' }, P: { r: ['01110', '10000', '10110', '10001', '01110'], c: '#ff6fb5' }
+};
+const ICE = '#aee0ff';
+function iceDuck(x, y, mode, t, i) {
+  if (mode) drawDuck(x, y + (mode === 'hop' ? Math.round(Math.sin(t / 200 + i * 1.2) * 2) : 0), 1, { still: true });
+  else { drawDuck(x, y, 1, { tint: ICE, still: true }); R(x - 1, y - 1, 18, 18, 'rgba(174,224,255,.3)'); }
+}
+function sweat(x, y, t) { R(x, y + Math.round(Math.sin(t / 200)), 2, 3, '#59e0ff'); }
+function sparkAt(x, y, t, c, i = 0) { const k = Math.sin(t / 220 + i * 2); if (k > 0) { const n = k > .6 ? 2 : 1; R(x - n, y, 2 * n + 1, 1, c); R(x, y - n, 1, 2 * n + 1, c); } }
+function bubble(x, y, w, h) { R(x, y, w, h, '#fff'); R(x + 3, y + h, 3, 2, '#fff'); }
+function dots(x1, y1, x2, y2, n, c) { for (let i = 0; i < n; i++) { const k = i / (n - 1); R(x1 + (x2 - x1) * k, y1 + (y2 - y1) * k, 2, 2, c); } }
+function arcDots(x1, y1, x2, y2, h, n, c) { for (let i = 0; i <= n; i++) { const k = i / n; R(x1 + (x2 - x1) * k, y1 + (y2 - y1) * k - Math.sin(k * 3.1416) * h, 2, 2, c); } }
+function check(x, y, c) { R(x, y + 2, 1, 1, c); R(x + 1, y + 3, 1, 1, c); R(x + 2, y + 2, 1, 1, c); R(x + 3, y + 1, 1, 1, c); R(x + 4, y, 1, 1, c); R(x, y + 3, 1, 1, c); R(x + 1, y + 4, 1, 1, c); R(x + 2, y + 3, 1, 1, c); R(x + 3, y + 2, 1, 1, c); R(x + 4, y + 1, 1, 1, c); }
+function clock(x, y, t, rev) { disc(x, y, 9, '#fff7e0'); disc(x, y, 7, '#2b1d3a'); const a = (rev ? -1 : 1) * t / 500; R(x + Math.cos(a) * 5 - 1, y + Math.sin(a) * 5 - 1, 2, 2, '#59e0ff'); R(x + Math.cos(a / 12) * 3 - 1, y + Math.sin(a / 12) * 3 - 1, 2, 2, '#ff6fb5'); R(x - 1, y - 1, 2, 2, '#ffd23f'); }
+function mug(x, y, tea, straw) { R(x, y, 10, 14, 'rgba(255,255,255,.75)'); R(x + 1, y + 5, 8, 9, tea); R(x + 6, y - 8, 2, 10, straw); R(x + 2, y + 11, 2, 2, '#2b1d3a'); R(x + 6, y + 12, 2, 2, '#2b1d3a'); }
+function glitchBlob(x, y, t) { const f = Math.floor(t / 90); for (let i = 0; i < 90; i++) { const a = rnd(i + f * 3) * 6.283, r = rnd(i * 7 + f) * 14; R(x + Math.cos(a) * r, y + Math.sin(a) * r, 2, 2, i % 2 ? '#ff2fb0' : '#2fe0ff'); } disc(x, y, 6, '#fff'); R(x - 2, y - 2, 4, 4, '#1b1030'); }
+function emote(p, x, y) { const e = EM[p]; bubble(x, y, 17, 13); bmp(e.r, x + 3, y + 2, 2, e.c); }
+const PROP = {};
+
+/* ---- chapter 1 helpers ---- */
+function c1_foot(x, y, c, notch) {
+  R(x, y, 1, 1, c); R(x + 2, y, 1, 1, c);
+  if (notch) R(x + 1, y + 1, 2, 1, c); else R(x, y + 1, 3, 1, c);
+  R(x + 1, y + 2, 1, 1, c);
+}
+function c1_footprint(x, y, notch, c) {
+  c = c || '#5a3a1a';
+  c1_foot(x, y, c, notch); c1_foot(x + 6, y + 3, c, false);
+}
+function c1_ribbon(x, y, k, glow) {
+  k = k || 1;
+  bmp(['1000001', '1110111', '1111111', '1110111', '1000001'], x, y, k, '#59a0ff');
+  R(x + 3 * k, y + 2 * k, k, k, '#2b6fd0');
+  if (glow) { R(x - k, y + 2 * k, k, k, '#cfe6ff'); R(x + 7 * k, y + 2 * k, k, k, '#cfe6ff'); }
+}
+function c1_outline(x, y, s, t, a) {
+  g.globalAlpha = a * (0.8 + 0.2 * Math.sin(t / 300));
+  drawDuck(x, y, s, { tint: '#fff', bow: '#59a0ff', still: true, t });
+  g.globalAlpha = 1;
+}
+function c1_note(x, y, c) { bmp(['011', '010', '010', '110', '110'], x, y, 2, c); }
+function c1_row(t, mode) {
+  const front = [58, 76, 112, 130], back = [67, 85, 121, 139];
+  back.forEach((x, i) => iceDuck(x, 44, mode, t, i + 4));
+  front.forEach((x, i) => iceDuck(x, 62, mode, t, i));
+  /* the tiny red-and-blue shirt on one frozen duck (a Mario-red scrap) */
+  R(78, 71, 7, 3, '#e8483c'); R(78, 74, 7, 2, '#3b78d0');
+}
+function c1_dissolve(ch, x, y, s, c, t, amt) {
+  GLYPH[ch].forEach((r, j) => [...r].forEach((p, i) => {
+    if (p === '1' && rnd(i * 5 + j * 11 + Math.floor(t / 120)) > amt) R(x + i * s, y + j * s + Math.round(amt * 6 * rnd(i + j)), s, s, c);
+  }));
+}
+
+/* ---- beats ---- */
+PROP.b1_plant = (t, st) => {
+  /* a very good listener: a potted plant with one big leaf-ear */
+  R(106, 80, 16, 3, '#8a4a22'); R(107, 83, 14, 10, '#c9743a'); R(108, 83, 12, 2, '#e69a5a'); R(110, 93, 8, 1, '#8a4a22');
+  R(113, 66, 2, 14, '#2f8f4f');
+  [[104, 70, 9], [116, 66, 10], [108, 62, 8]].forEach(([x, y, w], i) => { R(x, y, w, 3, '#46b86a'); R(x + 1, y - 1, w - 2, 1, '#7ddc92'); });
+  R(118, 72, 5, 4, '#46b86a'); R(119, 73, 2, 2, '#ffb3d9');
+  /* whisper dots drifting toward the plant */
+  for (let i = 0; i < 5; i++) { const k = ((t / 700 + i / 5) % 1); R(58 + k * 44, 78 - Math.sin(k * 3.14) * 8, 2, 2, 'rgba(255,255,255,' + (0.9 - k * 0.6) + ')'); }
+  bubble(84, 52, 14, 10); R(87, 56, 2, 2, '#6b5bd6'); R(91, 56, 2, 2, '#6b5bd6'); R(95, 56, 2, 2, '#6b5bd6');
+  sparkAt(120, 58, t, '#ffe45c', 1);
+};
+PROP.b1_count = (t, st) => {
+  const xs = [26, 50, 74, 98], ch = ['5', '4', '3', '2'];
+  ch.forEach((c, i) => {
+    const amt = i === 3 ? 0.35 + 0.35 * (0.5 + 0.5 * Math.sin(t / 260)) : i === 2 ? 0.0 : 0;
+    c1_dissolve(c, xs[i], 14, 4, ['#fff', '#d7e8ff', '#b8c8ff', '#ff6fb5'][i], t, amt);
+  });
+  /* the empty slot where "one" should go: dashed box, never filled */
+  for (let k = 0; k < 6; k++) { R(122 + k * 3, 12, 2, 1, '#8a79d8'); R(122 + k * 3, 29, 2, 1, '#8a79d8'); }
+  for (let k = 0; k < 6; k++) { R(122, 12 + k * 3, 1, 2, '#8a79d8'); R(139, 12 + k * 3, 1, 2, '#8a79d8'); }
+  /* the shadow's eyes gone from the doorway: a wisp of smoke */
+  for (let i = 0; i < 4; i++) R(110 + Math.sin(t / 300 + i) * 3, 52 - ((t / 40 + i * 7) % 22), 2, 2, 'rgba(90,70,140,.6)');
+};
+PROP.b1_trail = (t, st) => {
+  /* the mirror goes dark: nothing reflected at all */
+  R(8, 10, 144, 46, '#120d26'); R(8, 10, 144, 2, '#2b2352'); R(8, 54, 144, 2, '#2b2352');
+  for (let i = 0; i < 9; i++) R(14 + i * 16 + (i % 2) * 5, 18 + (i * 7) % 28, 1, 1, '#4a3d8f');
+  R(0, 72, 160, 20, 'rgba(0,0,0,.08)');
+  /* your prints end here ... */
+  c1_footprint(26, 92, false); c1_footprint(40, 88, false);
+  /* ... and the goose's begin right there, left foot nicked */
+  [[56, 86], [70, 82], [84, 79], [98, 76], [111, 73]].forEach(([x, y]) => c1_footprint(x, y, true, '#3a1d3f'));
+  /* the note on the floor */
+  R(126, 76, 18, 14, '#fff7e0'); R(126, 76, 18, 1, '#e8d9b0');
+  [0, 1, 2].forEach(i => R(129, 79 + i * 3, 12, 1, '#8a79b0')); R(135, 87, 6, 1, '#59a0ff');
+  sparkAt(124, 74, t, '#ffe45c', 0);
+  clock(138, 30, t, true);
+};
+
+/* ---- scenes ---- */
+PROP.s1 = (t, st) => {
+  const mode = st === 'E' ? 'hop' : 0;
+  if (st === 'I') {
+    /* the mirror shows twelve ducks and one gap, a ribbon in the gap */
+    [58, 76, 112, 130].forEach(x => { g.globalAlpha = .55; drawDuck(x, 18, 1, { tint: '#9fd8ff', still: true }); drawDuck(x + 9, 32, 1, { tint: '#9fd8ff', still: true }); g.globalAlpha = 1; });
+    c1_ribbon(96, 32, 2, true); sparkAt(94, 26, t, '#fff', 1); sparkAt(110, 36, t, '#59e0ff', 2);
+    R(88, 18, 28, 1, 'rgba(255,255,255,.6)'); R(88, 50, 28, 1, 'rgba(255,255,255,.6)');
+  }
+  c1_row(t, mode);
+  /* the empty spot in the front row: a faint outline duck and the ribbon on the floor */
+  for (let k = 0; k < 8; k++) { R(91 + k * 3, 78, 2, 1, 'rgba(255,255,255,.55)'); R(91 + k * 3, 88, 2, 1, 'rgba(255,255,255,.55)'); }
+  c1_outline(94, 62, 1, t, .4);
+  c1_ribbon(99, 80, 1, true);
+  if (st !== 'I') { /* skipping music */
+    const y = 20 + ((t / 25) % 30); R(10, y, 140, 1, 'rgba(255,111,181,.55)');
+    c1_note(76, 20, '#fff'); c1_note(86, 14, '#ff6fb5');
+  }
+  if (st === 'E') {
+    [[62, 30], [98, 24], [124, 32]].forEach(([x, y], i) => sparkAt(x, y, t, '#ffe45c', i));
+    c1_note(70, 32 + Math.round(Math.sin(t / 150) * 2), '#ffe45c'); c1_note(108, 28 - Math.round(Math.sin(t / 130) * 2), '#ff6fb5');
+    bmp(EM.E.r, 56, 50, 2, '#e8483c');
+  }
+};
+
+PROP.s2 = (t, st) => {
+  /* the reflection: a full second behind */
+  g.globalAlpha = .45; drawDuck(22, 20, 2, { tint: '#9fe8ff', still: false, t: t - 1000 }); g.globalAlpha = 1;
+  R(16, 54, 44, 1, 'rgba(255,255,255,.5)');
+  word('-1', 62, 22, 2, '#fff');
+  R(80, 24, 2, 8, '#59e0ff'); R(78, 26, 2, 4, '#59e0ff'); R(76, 28, 2, 0, '#59e0ff');
+  for (let k = 0; k < 2; k++) { const r = (t / 25 + k * 20) % 40; for (let a = 0; a < 14; a++) { const an = a / 14 * 6.283; R(100 + Math.cos(an) * r, 90 + Math.sin(an) * r * .3, 2, 1, 'rgba(89,224,255,.55)'); } }
+  /* the wall clock, ticking backward */
+  clock(138, 26, t, true);
+  R(129, 38, 3, 1, '#59e0ff'); R(127, 39, 3, 1, '#59e0ff'); R(129, 40, 3, 1, '#59e0ff');
+  /* prints that will matter later */
+  if (st === 'S') {
+    for (let k = 0; k < 14; k++) { const a = k / 14 * 6.283; R(138 + Math.cos(a) * 12, 26 + Math.sin(a) * 12, 2, 2, '#ffe45c'); }
+    check(150, 38, '#2fa84f');
+    [[74, 80], [96, 88], [118, 78]].forEach(([x, y]) => { R(x, y, 12, 5, '#ffe45c'); R(x + 1, y + 1, 10, 3, '#fff3b0'); });
+    check(98, 74, '#2fa84f'); R(60, 64, 2, 2, '#ffe45c');
+    arcDots(60, 70, 126, 34, 14, 7, 'rgba(255,255,255,.7)');
+  }
+  if (st === 'N') {
+    const pts = [[74, 30], [88, 42], [100, 28], [112, 44], [124, 34]];
+    pts.forEach(([x, y], i) => { sparkAt(x, y, t, '#fff', i); if (i) dots(pts[i - 1][0], pts[i - 1][1], x, y, 6, '#ff6fb5'); });
+    c1_footprint(60, 90, true, 'rgba(58,29,63,.8)');
+  }
+};
+
+PROP.s3 = (t, st) => {
+  const down = st === 'T' || st === 'F';
+  /* instructor, frozen mid-spin */
+  if (!down) { drawDuck(62, 16, 2, { tint: '#8ecbff', still: true, rot: .5, t }); for (let a = 0; a < 7; a++) { const an = a / 7 * 6.283 + t / 400; R(78 + Math.cos(an) * 24, 34 + Math.sin(an) * 7, 2, 2, 'rgba(255,255,255,.7)'); } }
+  else drawDuck(62, 56, 2, { tint: '#8ecbff', still: false, t });
+  /* the stuck partner */
+  if (!down) {
+    drawDuck(104, 20, 2, { tint: '#ffb3d9', flip: true, still: true, rot: -.35, t });
+    R(100, 14, 36, 44, 'rgba(174,224,255,.22)'); R(100, 14, 36, 1, 'rgba(255,255,255,.55)');
+    sweat(96, 24, t); R(102, 66, 32, 2, 'rgba(255,230,100,.45)');
+    R(110, 78, 18, 6, 'rgba(0,0,0,.14)');
+  } else drawDuck(102, 58, 2, { tint: '#ffb3d9', flip: true, still: false, t });
+  if (st === 'T') {
+    /* the rotation, solved: pairs numbered in order, and one step nobody taught */
+    [60, 82, 104].forEach((x, i) => { R(x, 98, 12, 2, '#59e0ff'); word(String(i + 1), x + 4, 102, 2, '#fff'); });
+    dots(64, 96, 108, 96, 8, 'rgba(255,255,255,.6)');
+    c1_foot(124, 96, '#59a0ff', false); sparkAt(122, 94, t, '#fff', 3); word('?', 128, 100, 1, '#ffe45c');
+    check(70, 30, '#2fa84f'); check(88, 38, '#2fa84f'); check(106, 30, '#2fa84f');
+  }
+  if (st === 'F') {
+    bmp(HEART, 82, 40, 2, '#ff4f87'); bmp(HEART, 70, 28, 1, '#ff9cc0');
+    bubble(116, 40, 20, 12); R(119, 44, 3, 3, '#6b5bd6'); R(124, 44, 3, 3, '#6b5bd6'); R(129, 44, 3, 3, '#6b5bd6');
+    [[60, 40], [150, 60]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+  }
+};
+
+PROP.s4 = (t, st) => {
+  /* the doorway, with the egg's glow leaking round the shadow */
+  R(98, 36, 40, 56, '#120d26'); R(100, 38, 36, 52, '#1a1230'); R(117, 38, 2, 52, 'rgba(255,230,100,.35)');
+  g.globalAlpha = .4; disc(112, 78, 13, '#ffc84a'); g.globalAlpha = 1;
+  R(112, 78, 1, 1, '#fff'); sparkAt(104, 70, t, '#ffe9a0', 2);
+  /* the skipping record */
+  disc(70, 24, 13, '#222'); disc(70, 24, 10, '#333'); disc(70, 24, 4, '#ff6fb5'); R(69, 23, 2, 2, '#fff');
+  const a = t / 300; R(70 + Math.cos(a) * 9, 24 + Math.sin(a) * 9, 2, 2, '#fff');
+  for (let i = 0; i < 5; i++) { const h = 4 + Math.abs(Math.sin(t / 180 + i)) * 14; R(56 + i * 5, 66 - h, 4, h, ['#ff6fb5', '#59e0ff', '#ffd23f'][i % 3]); }
+  /* ten beats left */
+  for (let i = 0; i < 10; i++) R(26 + i * 4, 12, 3, 3, i >= Math.floor(t / 400) % 11 ? '#ffe45c' : '#3a2f78');
+  if (st === 'J') {
+    R(112, 31, 24, 5, '#2fa84f'); R(114, 32, 3, 3, '#fff'); R(120, 33, 12, 1, '#fff');
+    /* a count in my bubble, and a second voice a beat late */
+    const me = Math.floor(t / 400) % 4, late = (me + 3) % 4;
+    bubble(10, 22, 40, 14);
+    for (let i = 0; i < 4; i++) word(String(5 + i), 13 + i * 9, 26, 2, i === me ? '#e8483c' : '#2b1d3a');
+    bubble(98, 10, 40, 14);
+    for (let i = 0; i < 4; i++) word(String(5 + i), 101 + i * 9, 14, 2, i === late ? '#7a2fb0' : '#7a6aa0');
+  }
+  if (st === 'P') {
+    for (let i = 0; i < 5; i++) R(58 + i * 8, 92 - (i % 2) * 3, 3, 2, 'rgba(255,255,255,.8)');
+    for (let i = 0; i < 4; i++) sparkAt(30 + i * 8, 56 - (i % 2) * 10, t, '#ffe45c', i);
+    /* the shadow's copy of the move, a beat later */
+    for (let i = 0; i < 4; i++) sparkAt(88 + i * 6, 58 - (i % 2) * 10, t - 300, '#7a2fb0', i + 1);
+    for (let i = 0; i < 5; i++) R(60 + i * 8 + 14, 94 - (i % 2) * 3, 3, 2, 'rgba(90,50,140,.6)');
+    c1_note(60, 30, '#ff6fb5'); c1_note(48, 24, '#59e0ff');
+  }
+};
+
+
+function c2_ribbon(x, y) { R(x, y, 3, 1, '#59a0ff'); R(x + 1, y + 1, 1, 2, '#59a0ff'); R(x + 2, y + 3, 1, 1, '#59a0ff'); R(x, y + 1, 1, 1, '#2f6fd0'); }
+function c2_table(x1, x2) {
+  R(x1, 76, x2 - x1, 3, '#fff7e0'); R(x1, 79, x2 - x1, 1, '#d9b27a');
+  const m = (x1 + x2) >> 1; R(m - 1, 80, 3, 10, '#c98a46'); R(m - 5, 90, 11, 2, '#c98a46');
+}
+// a real boba cup: lid, liquid, pearls, straw(s). (x,y) = top-left of the cup body; bottom at y+14
+function c2_cup(x, y, body, straw, straw2) {
+  R(x, y + 3, 10, 11, 'rgba(255,255,255,.6)'); R(x + 1, y + 5, 8, 8, body); R(x + 2, y + 13, 6, 1, 'rgba(0,0,0,.18)');
+  R(x - 1, y + 2, 12, 2, '#fffdf5'); R(x + 1, y + 4, 1, 7, 'rgba(255,255,255,.55)');
+  R(x + 2, y + 11, 2, 2, '#2b1d3a'); R(x + 5, y + 10, 2, 2, '#2b1d3a'); R(x + 7, y + 12, 2, 1, '#2b1d3a'); R(x + 3, y + 11, 1, 1, '#9a7aaa');
+  R(x + 6, y - 7, 2, 10, straw); R(x + 6, y - 7, 1, 1, '#fff');
+  if (straw2) { R(x + 3, y - 5, 2, 8, straw2); R(x + 3, y - 5, 1, 1, '#fff'); R(x + 4, y - 7, 3, 2, straw2); }
+}
+// the empty seat's cup: only an outline, blue straw, tiny ribbon. 12 wide x 16 tall, bottom at y+16
+function c2_outlineCup(x, y, t, fill) {
+  const w = 12, h = 16;
+  R(x, y, w, h, fill ? 'rgba(255,255,255,.75)' : 'rgba(170,195,235,.28)');
+  if (fill) R(x + 1, y + 6, w - 2, h - 6, fill);
+  const on = Math.sin(t / 500) > 0, c = fill ? '#fff' : (on ? '#d6e2ff' : '#9fb2e6');
+  for (let i = 0; i < w; i += 2) { R(x + i, y, 1, 1, c); R(x + i, y + h - 1, 1, 1, c); }
+  for (let j = 0; j < h; j += 2) { R(x, y + j, 1, 1, c); R(x + w - 1, y + j, 1, 1, c); }
+  R(x - 1, y - 1, w + 2, 1, on ? 'rgba(214,226,255,.7)' : 'rgba(159,178,230,.5)');
+  R(x + 7, y - 9, 2, 11, '#59a0ff'); R(x + 7, y - 9, 1, 1, '#b9d8ff');
+  c2_ribbon(x - 4, y + 12);
+}
+function c2_ghost(x, y, a, rot) {
+  g.globalAlpha = a; drawDuck(x, y, 1, { tint: '#dfe9ff', flip: true, still: true, bow: '#59a0ff', rot: rot || 0 }); g.globalAlpha = 1;
+}
+function c2_window(t, st) {
+  R(88, 6, 64, 38, '#e8d7c0'); R(90, 8, 60, 34, '#a9d6f2'); R(90, 8, 60, 6, '#cfeaff'); R(119, 8, 2, 34, '#e8d7c0'); R(88, 42, 64, 3, '#c9a77a');
+  for (let i = 0; i < 4; i++) R(94 + i * 12, 12 + (i % 2) * 14, 1, 10, 'rgba(255,255,255,.55)');
+  const lag = Math.sin((t - 700) / 420);
+  c2_ghost(104 + Math.round(lag * 3), 22 + Math.round(Math.sin((t - 700) / 300)), .6, lag * .2);
+  if (st === 'I') { const k = Math.sin((t - 700) / 120) > 0 ? 2 : 1; R(126, 26 + k, 4, 1, '#59a0ff'); R(126, 30 - k, 4, 1, '#59a0ff'); }
+}
+function c2_pickup(v, col, bad) {
+  R(90, 8, 42, 18, '#111'); R(91, 9, 40, 16, '#0a2a1a'); word(v, 96, 12, 2, col);
+  if (bad) R(92, 10, 38, 1, 'rgba(255,255,255,.25)');
+}
+function c2_pearls(t) {
+  for (let i = 0; i < 11; i++) {
+    const x = 18 + rnd(i + 3) * 120 + Math.sin(t / 700 + i) * 3, y = 76 - ((t / 22 + i * 27) % 80);
+    R(x, y, 3, 3, '#2b1d3a'); R(x, y, 1, 1, '#9a7aaa');
+  }
+}
+const C2_QT = ['#6b5b95', '#8a6fb0', '#5b6aa8', '#7d5ba6'];
+
+PROP.s5 = (t, st) => {
+  for (let i = 0; i < 5; i++) if (Math.sin(t / 260 + i * 1.7) > .2) bmp(GLYPH['?'], 52 + (i * 5) % 20, 16 + i * 7, 1, ['#ffd23f', '#ff6fb5', '#59e0ff'][i % 3]);
+  for (let i = 0; i < 6; i++) drawDuck(60 + i * 16, 100 + (i % 2), 1, { tint: C2_QT[i % 4], still: true });
+  c2_table(50, 98);
+  c2_outlineCup(78, 60, t);
+  if (st === 'S') {
+    c2_cup(62, 62, '#d9a066', '#ff6fb5'); check(64, 40, '#2fa84f');
+    bmp(HEART, 63, 46 + Math.round(Math.sin(t / 300)), 1, '#ff6fb5');
+  }
+  if (st === 'N') {
+    c2_cup(62, 62, '#ff9fc0', '#59e0ff'); R(63, 67, 8, 2, '#59e0ff'); R(63, 69, 8, 2, '#c9a7ff'); R(63, 71, 8, 2, '#ffe45c'); R(63, 73, 8, 2, '#7dffb0');
+    [[54, 52], [74, 56], [62, 44], [70, 36]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+  }
+};
+
+PROP.s6 = (t, st) => {
+  c2_window(t, st);
+  for (let i = 0; i < 3; i++) {
+    const lean = st === 'E' ? Math.round(Math.sin(t / 160 + i) * 2) : 0;
+    drawDuck(52 + i * 17, 54 + lean, 1, { tint: st === 'E' ? '#ffd23f' : '#d9b8f0', still: true });
+  }
+  c2_table(50, 102);
+  c2_cup(61, 62, '#d9a066', '#ff6fb5'); c2_cup(78, 62, '#ff9fc0', '#59e0ff');
+  if (!st) { for (let i = 0; i < 3; i++) R(46 + i * 6, 44, 2, 2, Math.sin(t / 300 + i) > 0 ? '#6b5bd6' : '#c9b8f0'); }
+  if (st === 'E') {
+    bubble(34, 30, 40, 18); [0, 1, 2].forEach(i => { R(40 + i * 10, 38 - (i % 2) * 3, 3, 2, '#e8483c'); R(42 + i * 10, 33 - (i % 2) * 3, 1, 6, '#e8483c'); });
+    [[82, 28], [28, 40], [76, 52]].forEach(([x, y], i) => sparkAt(x, y, t, '#ffe45c', i));
+    if (Math.sin((t - 900) / 140) > -.2) { bubble(106, 34, 20, 12); for (let i = 0; i < 4; i++) R(109 + i * 4, 38 + (i % 2) * 2, 2, 2, '#555'); }
+  }
+  if (st === 'I') {
+    bubble(106, 34, 20, 12); const k = Math.round(Math.sin((t - 700) / 120)); R(110, 39 + k, 5, 1, '#555'); R(118, 39 - k, 4, 1, '#555');
+    bubble(32, 34, 22, 12); R(36, 39, 2, 2, '#555'); R(41, 39, 2, 2, '#555'); R(46, 39, 2, 2, '#555');
+  }
+};
+
+PROP.s7 = (t, st) => {
+  const seq = ['41', '14', '4-1'], v = st === 'J' ? '41' : st === 'P' ? '???' : seq[Math.floor(t / 700) % 3];
+  if (st !== 'J') c2_pearls(t);
+  c2_pickup(v, st === 'P' ? '#ffd23f' : '#7dffb0', st !== 'J');
+  clock(144, 22, t, true);
+  // pickup counter with a little hatch
+  R(56, 72, 50, 4, '#fff7e0'); R(56, 76, 50, 2, '#d9b27a'); R(60, 78, 42, 12, '#e9a0c4'); R(60, 78, 42, 2, '#ff6fb5');
+  R(64, 82, 34, 5, '#a8446f'); R(64, 82, 34, 1, '#7a2f50');
+  if (!st) { c2_cup(66, 58, 'rgba(255,255,255,.25)', '#7dffb0'); }
+  if (st === 'J') {
+    const s = Math.min(1, t / 500); c2_cup(Math.round(86 - 20 * s), 58, '#ffe29a', '#ff6fb5', '#59a0ff');
+    check(112, 30, '#2fa84f'); R(60, 70, 18, 1, 'rgba(255,255,255,.7)'); R(78, 66, 6, 1, 'rgba(255,255,255,.5)'); sparkAt(72, 48, t, '#fff');
+  }
+  if (st === 'P') {
+    const b = Math.round(Math.sin(t / 220) * 3), x = 66 + Math.round(Math.sin(t / 700) * 4);
+    c2_cup(x, 42 + b, '#c9a7ff', '#ff6fb5', '#59a0ff');
+    sparkAt(x - 6, 46, t, '#ffe45c'); sparkAt(x + 16, 54, t, '#fff', 2); R(x + 14, 62, 4, 1, '#fff'); R(x + 16, 66, 4, 1, '#fff'); R(x - 4, 58, 3, 1, '#fff');
+  }
+};
+
+PROP.s8 = (t, st) => {
+  c2_table(60, 102);
+  c2_outlineCup(72, 60, t);
+  c2_cup(88, 62, '#d9a066', '#ff6fb5', st === 'F' ? '#59a0ff' : null);
+  if (!st) {
+    bubble(98, 28, 24, 20); bmp(['01110', '10001', '10001', '11111', '11011', '11111'], 104, 31, 2, '#555');
+    if (Math.sin(t / 400) > .3) sparkAt(96, 56, t, '#59e0ff');
+  }
+  if (st === 'T') {
+    const tl = Math.round(Math.sin(t / 700) * 1);
+    R(58, 24, 30, 2, '#caa45a'); R(72, 24, 2, 22, '#caa45a'); R(66, 46, 14, 2, '#caa45a'); R(70, 22, 6, 2, '#ffd23f');
+    R(58, 26, 1, 8 + tl, '#caa45a'); R(87, 26, 1, 8 - tl, '#caa45a'); R(54, 34 + tl, 10, 2, '#ffd23f'); R(82, 34 - tl, 10, 2, '#ffd23f');
+    R(57, 28 + tl, 5, 6, '#d9a066'); R(59, 24 + tl, 1, 4, '#ff6fb5');
+    R(84, 29 - tl, 6, 5, '#fff1c9'); R(84, 29 - tl, 6, 1, '#c9a77a'); R(86, 31 - tl, 2, 2, '#e8483c');
+    check(112, 30, '#2fa84f');
+  }
+  if (st === 'F') {
+    bmp(HEART, 72, 30 + Math.round(Math.sin(t / 300)), 2, '#ff4f87'); sparkAt(66, 52, t, '#fff'); sparkAt(104, 50, t, '#ffe45c', 1); sparkAt(92, 44, t, '#ff6fb5', 2);
+  }
+};
+
+PROP.b2_gap = (t, st) => {
+  drawPip(88, 46, 2, { outline: true, flip: true, alpha: .65 + .2 * Math.sin(t / 500), still: true, t });
+  c2_table(52, 112);
+  c2_cup(60, 62, '#d9a066', '#ff6fb5');
+  c2_outlineCup(76, 60, t);
+  for (let i = 0; i < 5; i++) drawDuck(66 + i * 16, 100 + (i % 2), 1, { tint: C2_QT[i % 4], still: true });
+  if (Math.sin(t / 260) > .2) bmp(GLYPH['?'], 56, 16, 1, '#ffd23f');
+};
+
+PROP.b2_notebook = (t, st) => {
+  for (let i = 0; i < 3; i++) { const x = 70 + i * 16; for (let y = 0; y < 60; y += 2) R(x + (y >> 2), y, 6 + (y >> 3), 2, 'rgba(255,240,170,.10)'); }
+  for (let i = 0; i < 5; i++) R(76 + i * 11 + Math.sin(t / 500 + i) * 2, 20 + ((t / 45 + i * 11) % 36), 2, 2, 'rgba(255,255,255,.75)');
+  R(122, 6, 32, 38, '#c98a46'); R(124, 8, 28, 34, '#fff1c9'); R(137, 8, 2, 34, '#d9b27a');
+  for (let i = 0; i < 5; i++) { R(127, 13 + i * 6, 8 + (i * 3) % 3, 1, i < 3 ? '#2b1d3a' : 'rgba(43,29,58,.25)'); R(141, 13 + i * 6, 6 + (i * 2) % 4, 1, i < 2 ? '#2b1d3a' : 'rgba(43,29,58,.2)'); }
+  const k = Math.floor(t / 180) % 6, x = 141 + k * 1.5; R(x, 36, 1, 1, '#2b1d3a');
+  R(x + 1, 31, 2, 7, '#ffd23f'); R(x + 1, 31, 2, 1, '#ff6fb5'); R(x + 1, 38, 2, 1, '#2b1d3a');
+};
+
+PROP.b2_hic = (t, st) => {
+  for (let i = 0; i < 6; i++) { const y = 30 + ((t / 50 + i * 12) % 40); if (Math.sin(t / 130 + i * 2) > -.4) bmp(GLYPH['?'], 16 + (i * 9) % 40 + Math.round(Math.sin(t / 200 + i) * 2), y, 1, ['#ffd23f', '#ff6fb5', '#59e0ff'][i % 3]); }
+  const h = Math.floor(t / 900) % 2, p = (t % 900) / 900;
+  if (h) for (let i = 0; i < 3; i++) { const r = 2 + i; disc(122 + i * 6, 86 - p * 30 - i * 8, r, 'rgba(255,111,181,.55)'); disc(122 + i * 6, 86 - p * 30 - i * 8, r - 1, 'rgba(255,255,255,.4)'); }
+  R(112, 62, 40, 2, 'rgba(255,47,176,.45)'); R(112 + (t / 30 % 40), 66, 8, 1, 'rgba(47,224,255,.7)');
+  const j = Math.floor(t / 300) % 4;
+  R(20 + j * 3, 22 + j * 8, 26, 3, 'rgba(47,224,255,.5)'); R(104 - j * 4, 20 + (3 - j) * 6, 20, 3, 'rgba(255,47,176,.45)');
+  R(56, 74 + (j % 2), 40, 2, 'rgba(255,255,255,.25)');
+};
+
+PROP.b2_receipt = (t, st) => {
+  R(106, 8, 44, 62, '#fffdf2');
+  for (let i = 0; i < 6; i++) R(106 + i * 8, 70, 4, 3, '#fffdf2');
+  word('ROUND', 108, 12, 2, '#2b1d3a');
+  R(110, 28, 36, 1, '#c9b8a0'); R(110, 32, 28, 1, '#c9b8a0'); R(110, 36, 32, 1, '#c9b8a0');
+  word('8', 126, 44, 2, '#e8483c'); R(134, 54, 8, 1, '#c9b8a0'); R(110, 60, 20, 1, '#c9b8a0');
+  const on = Math.sin(t / 250) > 0;
+  R(60, 62, 32, 30, '#2c1f6b'); R(58, 62, 2, 30, '#1a1240'); R(92, 62, 2, 30, '#1a1240'); R(60, 62, 32, 3, '#ff6fb5');
+  R(64, 67, 24, 14, on ? '#3a0f20' : '#14102a'); R(65, 68, 22, 12, on ? '#e8483c' : '#5b1a30');
+  R(70, 71, 2, 2, '#fff'); R(80, 71, 2, 2, '#fff'); R(71, 72, 1, 1, '#14102a'); R(81, 72, 1, 1, '#14102a'); R(72, 76, 8, 1, '#fff'); R(72, 77, 1, 1, '#fff'); R(79, 77, 1, 1, '#fff');
+  R(63, 84, 26, 2, '#14102a'); R(66, 86, 4, 4, '#ffd23f'); R(74, 86, 4, 4, '#59e0ff'); R(82, 86, 4, 4, '#ff6fb5');
+  R(60, 92, 32, 3, '#1a1240');
+};
+
+
+// ---- chapter 3 helpers ----
+function c3_ribbon(x, y) { R(x, y, 4, 3, '#59a0ff'); R(x + 4, y + 1, 3, 2, '#59a0ff'); R(x + 1, y + 1, 2, 1, '#2f6fd0'); R(x + 2, y - 1, 2, 1, '#9cc8ff'); }
+
+// faint outline Second Duck (Pip) with the blue bow; fill = fraction (0..1) filled in from the bottom
+function c3_ghost(x, y, s, a, flip, t, fill) {
+  g.save();
+  g.globalAlpha = a * .95;
+  [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => drawDuck(x + dx, y + dy, s, { tint: '#bcd0ff', flip, still: true }));
+  g.globalAlpha = a * .45;
+  drawDuck(x, y, s, { tint: '#8fa6ff', bow: '#59a0ff', flip, still: true });
+  if (fill > 0) {
+    g.beginPath(); g.rect(x - 2, y + 16 * s * (1 - fill), 20 * s, 16 * s * fill + 4); g.clip();
+    g.globalAlpha = .95; drawDuck(x, y, s, { tint: '#fffdf2', bow: '#59a0ff', flip, still: true });
+  }
+  g.globalAlpha = Math.min(1, a + .4); const bx = x + (flip ? 5 : 8) * s; R(bx, y - s, 3 * s, 2 * s, '#59a0ff'); R(bx + s, y - s, s, s, '#9cc8ff');
+  g.restore();
+}
+
+function c3_stick(x, y, lean, ghost) {
+  g.save(); if (ghost) g.globalAlpha = .6;
+  R(x - 3, y + 4, 7, 2, ghost ? '#9fb4ff' : '#666');
+  for (let j = 0; j < 9; j++) R(x + lean * j / 8, y + 4 - j, 2, 1, ghost ? '#cfdaff' : '#ccc');
+  disc(Math.round(x + lean), y - 5, 3, ghost ? '#9fb4ff' : '#e8483c');
+  R(Math.round(x + lean) - 1, y - 7, 1, 1, '#fff');
+  g.restore();
+}
+
+function c3_chick(x, y, hat) {
+  R(x + 1, y + 2, 7, 5, '#fff6d8'); R(x + 2, y + 1, 5, 1, '#fff6d8');
+  R(x + 1, y + 6, 7, 1, '#e8dcb4');
+  R(x, y + 3, 1, 2, '#ff8a1f'); R(x + 2, y + 3, 1, 1, '#1b1030');
+  R(x + 6, y + 3, 2, 2, '#ffd7a8');
+  R(x + 2, y + 7, 1, 1, '#ff8a1f'); R(x + 5, y + 7, 1, 1, '#ff8a1f');
+  if (hat) {
+    R(x + 1, y, 7, 1, '#fff'); R(x + 2, y - 3, 5, 3, '#fff'); R(x + 1, y - 5, 7, 2, '#fff'); R(x + 3, y - 6, 3, 1, '#fff');
+    R(x + 2, y - 2, 5, 1, '#cfd6e8');
+  } else { R(x + 3, y, 2, 1, '#e8483c'); R(x + 4, y + 1, 1, 1, '#e8483c'); }
+}
+
+// 2px duck footprint, left foot gets a 1px nick
+function c3_print(x, y, notch, c) {
+  R(x, y, 1, 1, c); R(x + 2, y, 1, 1, c); R(x + 1, y, 1, 1, c); R(x, y + 1, 3, 2, c);
+  if (notch) R(x + 2, y + 2, 1, 1, '#241a5a');
+}
+function c3_trail(n) {
+  for (let i = 0; i < n; i++) c3_print(24 + i * 7, 100 + (i % 2) * 4, 0, 'rgba(255,233,168,.55)');
+  for (let i = 0; i < n; i++) c3_print(24 + n * 7 + 6 + i * 7, 100 + (i % 2) * 4, !(i % 2), 'rgba(201,167,255,.8)');
+}
+
+// Player 2 cabinet frame (shared by the intro beat and scene 9)
+function c3_cabBody(x, y, k) {
+  R(x, y, 44, 76, '#0d0a22'); R(x + 1, y + 1, 42, 74, '#2a1c66');
+  R(x + 3, y + 3, 38, 16, '#111'); R(x + 3, y + 3, 38, 2, k ? '#ffd23f' : '#ff6fb5'); R(x + 3, y + 17, 38, 2, k ? '#ff6fb5' : '#ffd23f');
+  R(x + 2, y + 48, 40, 8, '#3a2a8a'); R(x + 2, y + 48, 40, 1, '#6a5ad6');
+  R(x + 2, y + 58, 40, 18, '#1b1450'); R(x + 19, y + 64, 6, 3, k ? '#ffd23f' : '#6a5000');
+}
+
+PROP.b3_cab = (t, st) => {
+  const x = 108, y = 8, k = Math.floor(t / 260) % 2;
+  c3_cabBody(x, y, k);
+  word('2', x + 19, y + 6, 2, k ? '#ffd23f' : '#fff');
+  R(x + 3, y + 22, 38, 24, '#05040f');
+  for (let i = 0; i < 5; i++) R(x + 6 + i * 7, y + 27, 5, 12, ((Math.floor(t / 200) + i) % 5 === 0) ? '#ff2fb0' : '#3a1560');
+  R(x + 8, y + 42, 28, 2, k ? '#ffd23f' : '#4a3a00');
+  c3_stick(x + 12, y + 54, 0, false); R(x + 21, y + 51, 3, 3, '#ff6fb5');
+  c3_stick(x + 33, y + 54, Math.sin(t / 140) * 3, true);
+  // the empty player-2 spot: faint outline duck + a blue ribbon scrap on the floor
+  c3_ghost(70, 64, 2, .55 + .15 * Math.sin(t / 300), false, t, 0);
+  c3_ribbon(66, 96);
+  R(73, 96, 2, 1, '#59a0ff');
+  if (Math.sin(t / 260) > 0) { R(98, 54, 6, 1, '#ffd23f'); R(100, 52, 2, 5, '#ffd23f'); }
+};
+
+PROP.b3_guard = (t, st) => {
+  const ph = (t % 2600) / 2600;
+  const gx = ph < .25 ? 70 + ph / .25 * 16 : 86 - (ph - .25) / .75 * 14;
+  glitchBlob(Math.round(gx), 66, t);
+  R(Math.round(gx) - 1, 70, 3, 1, 'rgba(255,255,255,.5)');
+  // clamp lines around the goose's grip
+  [[96, 70], [96, 76], [96, 82]].forEach(([x, y], i) => { if (Math.sin(t / 90 + i * 2) > 0) R(x, y, 3, 1, '#fff'); });
+  // the goose's pale wings clamped around the Egg, trembling
+  const tr = Math.round(Math.sin(t / 50));
+  R(61 + tr, 20, 3, 22, '#c9a7ff'); R(62 + tr, 40, 6, 3, '#c9a7ff'); R(97 - tr, 20, 3, 22, '#c9a7ff'); R(92 - tr, 40, 6, 3, '#c9a7ff');
+  R(63 + tr, 22, 1, 16, '#e6d6ff'); R(97 - tr, 22, 1, 16, '#e6d6ff');
+  [[56, 30], [102, 34], [58, 22]].forEach(([x, y], i) => { if (Math.sin(t / 70 + i * 2) > 0) R(x, y, 2, 1, '#fff'); });
+  c3_trail(4);
+};
+
+PROP.b3_count = (t, st) => {
+  const seq = [5, 4, 3, 2, 2, 2, 2, 2], d = seq[Math.floor(t / 700) % 8];
+  bubble(108, 42, 12, 11); word(String(d), 111, 45, 1, '#2b1d3a');
+  if (Math.floor(t / 700) % 8 >= 3 && Math.sin(t / 80) > 0) R(122, 44, 2, 3, '#59e0ff');
+  c3_trail(4);
+  // the SLOW DOWN note, as a little sticky snail
+  R(66, 62, 12, 11, '#ffe45c'); R(66, 62, 12, 2, '#e8c200');
+  R(70, 66, 4, 1, '#2b1d3a'); R(70, 67, 4, 1, '#2b1d3a'); R(71, 68, 2, 3, '#2b1d3a'); R(70, 70, 4, 1, '#2b1d3a');
+  c3_ribbon(112, 96);
+};
+
+PROP.s9 = (t, st) => {
+  const x = 58, y = 6, k = Math.floor(t / 260) % 2;
+  c3_cabBody(x, y, k);
+  word('2', x + 19, y + 6, 2, '#ffd23f');
+  R(x + 3, y + 22, 38, 24, '#05040f');
+  drawDuck(x + 6, y + 24, 1, { still: true });
+  c3_ghost(x + 24, y + 24, 1, .5 + .1 * Math.sin(t / 250), false, t, 0);
+  R(x + 6, y + 42, 14, 2, '#2fa84f');
+  R(x + 24, y + 42, 14, 2, '#2a2060');
+  c3_stick(x + 10, y + 54, 0, false); R(x + 21, y + 51, 3, 3, '#ff6fb5');
+  if (!st) {
+    if (Math.sin(t / 130) > 0) R(x + 24, y + 42, 2, 2, '#e8483c');
+    c3_stick(x + 34, y + 54, Math.sin(t / 700) * .8, true);
+    c3_ribbon(x + 29, y + 59);
+  } else {
+    c3_stick(x + 34, y + 54, Math.sin(t / 120) * 4, true);
+    c3_ribbon(x + 29, y + 59);
+  }
+  if (st === 'T') {
+    R(x + 24, y + 42, 12, 2, '#59e0ff'); [0, 1, 2, 3].forEach(i => R(x + 24 + i * 3, y + 41 - i, 2, 1, '#59e0ff'));
+    bubble(4, 26, 26, 11); word('3-2-1', 7, 29, 1, '#2a2060');
+    dots(32, 34, 58, 40, 5, '#59e0ff');
+  }
+  if (st === 'F') {
+    R(x + 24, y + 42, 14, 2, '#2fa84f');
+    [0, 1, 2].forEach(i => bmp(HEART, 52 + i * 12, 38 - ((t / 40 + i * 14) % 30), 1, '#ff4f87'));
+  }
+};
+
+PROP.s10 = (t, st) => {
+  // machine frame
+  R(100, 12, 52, 76, '#0d0a22'); R(101, 13, 50, 74, '#2a1c66');
+  R(103, 15, 46, 7, '#ffd23f'); for (let i = 0; i < 8; i++) if ((i + Math.floor(t / 200)) % 2) R(105 + i * 5, 17, 2, 3, '#e8483c');
+  R(103, 24, 46, 42, '#0b1030'); R(103, 24, 46, 1, '#59e0ff');
+  // plush pile
+  [[105, 50], [114, 52], [132, 50], [141, 52], [109, 58], [141, 59], [130, 58]].forEach(([px, py], i) => c3_chick(px, py, 0));
+  { const gl = Math.sin(t / 300) > 0; sparkAt(121, 50, t, '#ffe45c', 1); sparkAt(133, 53, t, '#fff', 2); R(120, 66, 11, 1, gl ? '#ffd23f' : '#c89a00'); }
+  c3_chick(122, 56, 1); R(123, 51, 5, 1, '#e8483c');
+  R(103, 66, 46, 2, '#111');
+  // rail + claw
+  R(105, 26, 42, 2, '#888');
+  let cx, len, held = null;
+  if (!st) { cx = 130 + Math.sin(t / 260) * 12 + Math.sin(t / 77) * 2; len = 12 + Math.abs(Math.sin(t / 400)) * 8; }
+  else if (st === 'S') { cx = 112 + Math.sin(t / 900) * 1; len = 30; held = 'cube'; }
+  else { cx = 126; len = 24 + Math.sin(t / 500) * 1; held = 'chef'; }
+  cx = Math.round(cx); len = Math.round(len);
+  R(cx - 1, 25, 4, 3, '#bbb'); R(cx, 28, 1, len, '#ccc');
+  R(cx - 4, 28 + len, 9, 2, '#ddd'); R(cx - 5, 30 + len, 2, 4, '#ddd'); R(cx + 4, 30 + len, 2, 4, '#ddd');
+  if (held === 'cube') { R(cx - 4, 32 + len - 3, 9, 7, '#59a0ff'); R(cx - 2, 32 + len - 1, 2, 2, '#fff'); R(cx + 2, 32 + len - 1, 2, 2, '#fff'); }
+  if (held === 'chef') c3_chick(cx - 4, 28 + len - 2, 1);
+  // control panel with scrambled stick
+  R(100, 68, 52, 14, '#3a2a8a');
+  c3_stick(114, 74, st ? 0 : Math.sin(t / 110) * 4, false);
+  R(128, 72, 4, 4, '#ff6fb5'); R(135, 72, 4, 4, '#ffd23f'); R(142, 72, 4, 4, '#59e0ff');
+  if (!st) for (let i = 0; i < 4; i++) if (Math.sin(t / 60 + i * 3) > .3) R(104 + rnd(i + Math.floor(t / 150)) * 40, 71 + i, 3, 1, ['#ff2fb0', '#2fe0ff'][i % 2]);
+  // SLOW DOWN sticky note on the glass: a down arrow and a snail
+  R(105, 28, 12, 12, '#ffe45c'); R(105, 28, 12, 2, '#e8c200');
+  R(110, 32, 2, 4, '#2b1d3a'); R(108, 35, 6, 1, '#2b1d3a'); R(109, 36, 4, 1, '#2b1d3a'); R(110, 37, 2, 1, '#2b1d3a');
+  R(106, 39, 7, 1, '#2b1d3a');
+  // reflection in the glass lags the duck by half a second
+  g.save(); g.globalAlpha = .7;
+  drawDuck(114, 38 + Math.round(Math.sin((t - 500) / 300) * 2), 1, { tint: '#ffe27a', flip: true, still: true });
+  g.restore();
+  if (st === 'S') { check(66, 52, '#2fa84f'); R(106, 30 + len + 4, 5, 1, 'rgba(255,255,255,.4)'); dots(124, 36, 112, 36, 4, '#ffe45c'); }
+  if (st === 'N') {
+    arcDots(52, 56, 124, 40, 20, 14, '#ffe45c');
+    [[70, 32], [94, 30], [112, 48]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+    // goose silhouette behind the glass, exhaling
+    R(138, 28, 8, 7, '#38304f'); R(144, 30, 3, 1, '#ff5a3c'); R(141, 30, 2, 2, '#ffd23f');
+    R(139, 35, 6, 3, '#38304f');
+    const f = (t / 60) % 12; R(147 + f, 31 - f / 4, 2, 2, 'rgba(255,255,255,.6)');
+  }
+};
+
+PROP.s11 = (t, st) => {
+  // exit signs getting eaten by the Glitch
+  const f = Math.floor(t / 90);
+  [20, 118].forEach((sx, si) => {
+    R(sx, 3, 24, 11, '#0a3'); R(sx + 1, 4, 22, 9, '#1d9a4a');
+    bmp(['00100', '01110', '00100', '01010', '10001'], sx + 9, 6, 1, '#fff');
+    for (let i = 0; i < 10; i++) { const nx = sx + (si ? 0 : 10) + rnd(i + f * 2 + si * 9) * 14; R(nx, 3 + rnd(i * 5 + f) * 10, 3, 2, i % 2 ? '#ff2fb0' : '#2fe0ff'); }
+    if (si === 0) { R(sx + 14, 4, 10, 9, '#17103a'); for (let i = 0; i < 5; i++) R(sx + 14 + rnd(i + f) * 8, 4 + rnd(i + 7 + f) * 8, 2, 2, i % 2 ? '#ff2fb0' : '#2fe0ff'); }
+  });
+  // countdown clock, running backward, with ten ticks
+  clock(80, 14, t, true);
+  const lit = 10 - Math.floor((t / 800) % 11);
+  for (let i = 0; i < 10; i++) R(61 + i * 4, 27, 3, 3, i < lit ? '#ff4f4f' : '#3a2a5a');
+  if (!st) {
+    for (let i = 0; i < 14; i++) R(58 + rnd(i) * 80, (t * .05 * (1 + i % 3) + rnd(i + 3) * 120) % 100, 3, 6, i % 2 ? '#e8483c' : '#ffd23f');
+    R(62, 90, 28, 3, '#e8483c'); R(68, 87, 20, 3, '#ffd23f'); R(74, 84, 12, 3, '#e8483c');
+  }
+  if (st === 'J') {
+    [[62, 10, '#e8483c'], [74, 16, '#ffd23f'], [86, 6, '#59e0ff']].forEach(([x, h, c]) => { R(x, 94 - h, 10, h, c); for (let y = 94 - h; y < 94; y += 3) R(x, y, 10, 1, 'rgba(0,0,0,.25)'); });
+    const dn = Math.floor(t / 600) % 10, gn = Math.floor((t - 300) / 600 + 100) % 10;
+    bubble(6, 58, 14, 11); word(String(dn), 9, 61, 1, '#2a8a3a');
+    const jx = Math.sin(t / 40) > 0 ? 1 : 0;
+    bubble(114 + jx, 42, 14, 11); word(String(gn), 117 + jx, 45, 1, '#8a2a2a');
+    sweat(130, 52, t);
+  }
+  if (st === 'P') {
+    for (let i = 0; i < 14; i++) { const a = i * .9 + t / 300, r = 30 - (i * 2 + t / 40) % 28; R(80 + Math.cos(a) * r, 60 + Math.sin(a) * r * .6, 3, 5, i % 2 ? '#e8483c' : '#ffd23f'); }
+    sparkAt(80, 56, t, '#fff'); sparkAt(66, 70, t, '#ffe45c', 3);
+    R(96, 66, 9, 5, '#ffd23f'); R(96, 66, 9, 1, '#fff2a0'); R(98, 68, 2, 1, '#e8a800'); sparkAt(100, 64, t, '#fff', 2);
+  }
+};
+
+PROP.s12 = (t, st) => {
+  // the one you're asking: a faint outline duck that flickers, with a blue ribbon scrap
+  const fl = Math.sin(t / 110) > .7 ? .12 : (.3 + .1 * Math.sin(t / 400));
+  const fill = st === 'E' ? .4 : (st === 'I' ? .25 : 0);
+  c3_ghost(104, 60, 2, st ? .5 : fl, true, t, fill);
+  c3_ribbon(94, 90);
+  const s = Math.sin(t / 220) > 0 ? 3 : 2; bmp(HEART, 80 - 3 * s, 26, s, '#ff4f87');
+  if (st === 'E') {
+    bubble(50, 36, 22, 18); bmp(EM.E.r, 56, 40, 2, '#e8483c');
+    [[40, 30], [90, 24], [124, 44], [76, 18], [138, 30]].forEach(([x, y], i) => sparkAt(x, y, t, ['#ffe45c', '#fff', '#59e0ff'][i % 3], i));
+    [[8, 44], [20, 36], [140, 44]].forEach(([x, y], i) => { const j = Math.round(Math.sin(t / 150 + i)); R(x, y + j, 3, 3, ['#ff6fb5', '#ffd23f', '#59e0ff'][i]); R(x + 1, y + 3 + j, 1, 3, '#fff'); });
+    R(100, 50, 3, 1, '#fff'); R(96, 54, 4, 1, '#fff');
+  }
+  if (st === 'I') {
+    dots(58, 76, 94, 74, 8, 'rgba(255,233,168,.6)');
+    R(94, 72, 14, 9, '#ffe9a8'); R(94, 72, 2, 9, '#e8c870'); R(106, 72, 2, 9, '#e8c870'); bmp(HEART, 98, 73, 1, '#ff4f87');
+    R(92, 78, 3, 3, '#eef3ff'); R(107, 78, 3, 3, '#eef3ff');
+    sparkAt(100, 66, t, '#fff');
+  }
+};
+
+
+const C4_INK = '#38304f', C4_BLUE = '#59a0ff', C4_COCOA = '#5b3a1a';
+
+// Pip's blue bow scrap (the right tail is shorter on purpose)
+function c4_ribbon(x, y) {
+  R(x - 3, y - 1, 3, 3, C4_BLUE); R(x + 2, y - 1, 3, 3, C4_BLUE); R(x, y, 2, 2, '#2a6fd0');
+  R(x - 1, y + 2, 1, 4, C4_BLUE); R(x + 2, y + 2, 1, 2, C4_BLUE);
+}
+
+// the counter where the sink used to be: bare wall tiles so the bowls sit on the worktop
+function c4_clear() {
+  R(82, 48, 40, 28, '#fff0d4');
+  R(84, 48, 1, 28, '#ecd9b0'); R(96, 48, 1, 28, '#ecd9b0'); R(108, 48, 1, 28, '#ecd9b0'); R(120, 48, 1, 28, '#ecd9b0');
+  R(82, 48, 40, 1, '#ecd9b0'); R(82, 60, 40, 1, '#ecd9b0'); R(82, 72, 40, 1, '#ecd9b0');
+  R(82, 76, 40, 4, '#e6c08f');
+}
+
+// a cream wall clock whose hands run BACKWARD, with a tiny arrow to say so
+function c4_clock(x, y, t) {
+  disc(x, y, 10, '#7a5030'); disc(x, y, 9, '#fff7e0'); disc(x, y, 7, '#fffdf2');
+  R(x - 1, y - 8, 2, 2, C4_INK); R(x - 1, y + 6, 2, 2, C4_INK); R(x - 8, y - 1, 2, 2, C4_INK); R(x + 6, y - 1, 2, 2, C4_INK);
+  const a = -t / 450, b = -t / 5400;
+  for (let k = 1; k <= 5; k++) R(x + Math.cos(a) * k - 1, y + Math.sin(a) * k - 1, 2, 2, C4_INK);
+  for (let k = 1; k <= 3; k++) R(x + Math.cos(b) * k - 1, y + Math.sin(b) * k - 1, 2, 2, '#e8483c');
+  R(x - 1, y - 1, 2, 2, '#ffd23f');
+  R(x - 4, y + 12, 6, 1, '#ff6fb5'); R(x - 5, y + 11, 1, 1, '#ff6fb5'); R(x - 4, y + 10, 1, 1, '#ff6fb5');
+}
+
+// mixing bowl on the counter (bottom at y+8). ghost = faint outline bowl tied with Pip's ribbon
+function c4_bowl(x, y, ghost, t, col) {
+  if (!ghost) {
+    R(x, y, 20, 2, '#c5c9d6'); R(x + 1, y + 2, 18, 2, '#dfe3ee'); R(x + 2, y + 4, 16, 2, '#c5c9d6'); R(x + 4, y + 6, 12, 2, '#9aa0b3');
+    R(x + 2, y - 1, 16, 2, col || C4_COCOA); R(x + 5, y - 1, 3, 1, '#7a5030'); R(x + 12, y - 2, 2, 1, '#7a5030');
+    return;
+  }
+  const ph = Math.floor(t / 400), c = '#ffffff';
+  R(x + 2, y + 1, 16, 6, 'rgba(190,215,255,.6)'); R(x + 1, y + 2, 18, 5, 'rgba(190,215,255,.25)');
+  for (let i = 0; i < 20; i++) if ((i + ph) % 4) R(x + i, y, 1, 1, c);
+  for (let i = 0; i < 12; i++) if ((i + ph) % 4) R(x + 4 + i, y + 8, 1, 1, c);
+  R(x, y + 1, 1, 1, c); R(x + 1, y + 3, 1, 1, c); R(x + 2, y + 5, 1, 1, c); R(x + 3, y + 7, 1, 1, c);
+  R(x + 19, y + 1, 1, 1, c); R(x + 18, y + 3, 1, 1, c); R(x + 17, y + 5, 1, 1, c); R(x + 16, y + 7, 1, 1, c);
+  // the ribbon wraps the bowl and ties in a bow
+  R(x + 1, y + 3, 18, 1, C4_BLUE);
+  c4_ribbon(x + 10, y + 1);
+}
+
+function c4_muffin(x, y, kind, bite) {
+  const top = kind === 'burnt' ? '#2a1a14' : kind === 'gold' ? '#8a5a2e' : C4_COCOA;
+  R(x + 1, y + 6, 8, 4, '#d9b27a'); R(x + 3, y + 6, 1, 4, '#b98c52'); R(x + 6, y + 6, 1, 4, '#b98c52');
+  R(x, y + 3, 10, 3, top); R(x + 1, y + 1, 8, 2, top); R(x + 3, y, 4, 1, top);
+  if (kind !== 'burnt') { R(x + 2, y + 2, 1, 1, '#ffe29a'); R(x + 6, y + 3, 1, 1, '#ffe29a'); R(x + 4, y + 1, 1, 1, '#ffe29a'); }
+  else { R(x + 2, y + 2, 1, 1, '#4a3328'); R(x + 6, y + 1, 1, 1, '#4a3328'); }
+  if (bite) { R(x + 6, y, 4, 3, '#fff0d4'); R(x + 5, y + 1, 1, 1, '#fff0d4'); }
+}
+
+// footprint in flour (left foot has the 1-px nick)
+function c4_print(x, y, nick) {
+  R(x, y, 3, 3, 'rgba(255,255,255,.85)'); R(x - 1, y + 3, 5, 1, 'rgba(255,255,255,.85)');
+  R(x - 1, y + 1, 1, 2, 'rgba(255,255,255,.6)'); R(x + 3, y + 1, 1, 2, 'rgba(255,255,255,.6)');
+  if (nick) R(x - 1, y + 3, 1, 1, '#b07a46');
+}
+
+// a spill of flour with the second set of prints walking out of it
+function c4_flour() {
+  R(62, 99, 22, 4, '#f6eedc'); R(67, 97, 12, 2, '#f6eedc'); R(56, 102, 8, 1, '#f6eedc'); R(72, 103, 3, 1, '#f6eedc');
+  [[96, 100, 1], [106, 106, 0], [116, 100, 1], [126, 106, 0]].forEach(p => c4_print(p[0], p[1], p[2]));
+}
+
+// the oven window itself: two ducks in the dark glass, the second a hair behind (lag in ms)
+function c4_ovenGlass(t, lag) {
+  R(16, 44, 36, 24, '#2b1d3a'); R(17, 45, 34, 22, '#3f3354'); R(16, 66, 36, 2, '#6a4a3a');
+  R(18, 46, 10, 1, 'rgba(255,255,255,.4)'); R(18, 48, 3, 1, 'rgba(255,255,255,.3)');
+  const a = Math.round(Math.sin(t / 260) * 2), b = Math.round(Math.sin((t - lag) / 260) * 2);
+  drawDuck(17 + a, 47, 1, { tint: '#ffd23f', still: true, t });
+  g.globalAlpha = .6;
+  drawDuck(33 + b, 47, 1, { tint: '#c9a7ff', flip: true, still: true, t });
+  g.globalAlpha = 1;
+}
+
+// the colour is draining out of the room
+function c4_drain(t, amt) {
+  const a = amt * (.85 + .15 * Math.sin(t / 500));
+  R(96, 0, 64, 78, 'rgba(180,185,200,' + (.3 * a) + ')');
+}
+
+// two quick tap sparks near the wing
+function c4_taps(x, y, t) {
+  const k = t % 1600;
+  if (k < 260 || (k > 420 && k < 680)) { star(x, y, '#fff'); star(x + 4, y - 3, '#ffe45c'); R(x - 5, y + 3, 2, 1, '#ffe45c'); R(x + 6, y + 3, 2, 1, '#ffe45c'); }
+}
+
+// digital timer that counts DOWN
+function c4_timer(x, y, t) {
+  R(x, y, 28, 18, '#111'); R(x, y, 28, 1, '#444'); R(x + 24, y + 3, 2, 2, '#ff3b3b');
+  word(String(9 - Math.floor(t / 700) % 10), x + 10, y + 3, 3, '#ff3b3b');
+}
+
+// the Glitch with a smear of chocolate over its eye
+function c4_chocEye(x, y, t) {
+  glitchBlob(x, y, t);
+  R(x - 5, y - 6, 11, 4, C4_COCOA); R(x - 4, y - 2, 3, 3, C4_COCOA); R(x + 2, y - 2, 2, 5, C4_COCOA); R(x - 2, y - 6, 3, 1, '#7a5030');
+}
+
+// smoke puffs
+function c4_smoke(x, y, t, n, col) {
+  for (let k = 0; k < n; k++) disc(x + (k % 3) * 12 + Math.sin(t / 300 + k) * 2, y - ((t / 40 + k * 10) % 26), 3, col || 'rgba(120,120,130,.6)');
+}
+
+PROP.b4_gap = (t, st) => {
+  c4_clear();
+  c4_drain(t, 1);
+  c4_bowl(60, 68, false, t, C4_COCOA);
+  c4_bowl(82, 68, true, t);
+  // recipe card, half erased
+  R(110, 10, 34, 40, '#fff7e0'); R(110, 10, 34, 3, '#e8483c');
+  [0, 1, 2, 3].forEach(i => { if (i % 2 && Math.sin(t / 220 + i) > 0) bmp(GLYPH['?'], 124, 17 + i * 8, 1, '#e8483c'); else if (i % 2 === 0) R(115, 18 + i * 8, 24, 2, '#aaa'); });
+  // oven clock, backward
+  c4_clock(84, 26, t);
+  c4_flour();
+};
+
+PROP.b4_taps = (t, st) => {
+  c4_clear();
+  c4_drain(t, .8);
+  c4_bowl(60, 68, false, t, C4_COCOA);
+  c4_bowl(82, 68, true, t);
+  // floating recipe numbers: minutes and grams
+  R(70, 8, 46, 28, '#fff7e0'); R(70, 8, 46, 2, '#e8483c');
+  word('11', 74, 13, 2, C4_INK); disc(106, 18, 5, '#2b1d3a'); R(105, 14, 1, 5, '#fff'); R(105, 18, 4, 1, '#fff');
+  word('31', 74, 24, 2, C4_INK); R(100, 28, 10, 2, '#7a7f93'); R(99, 26, 2, 6, '#7a7f93'); R(109, 26, 2, 6, '#7a7f93');
+  if (Math.sin(t / 260) > -.2) bmp(GLYPH['?'], 124, 36, 3, '#ff6fb5');
+  c4_taps(56, 72, t);
+  c4_flour();
+};
+
+PROP.b4_choc = (t, st) => {
+  c4_clear();
+  c4_ovenGlass(t, 300);
+  // the bitten muffin on the counter, crumbs drifting toward the Glitch
+  c4_muffin(70, 66, 'good', true);
+  dots(82, 62, 100, 44, 4, C4_COCOA);
+  sparkAt(78, 58, t, '#ffd23f', 2);
+  // the Glitch, chocolate on its eye, a very small "?"
+  c4_chocEye(112, 34, t);
+  if (Math.sin(t / 240) > -.3) bmp(GLYPH['?'], 128, 12, 2, '#ff6fb5');
+};
+
+PROP.b4_snow = (t, st) => {
+  R(0, 0, 160, 120, 'rgba(170,190,235,.22)');
+  c4_clear();
+  // snow settles on the oven, the counter and the ghost bowl
+  R(8, 27, 52, 3, '#fff'); R(12, 25, 8, 2, '#fff'); R(36, 25, 10, 2, '#fff');
+  R(0, 74, 160, 2, '#fff'); [[70, 72], [112, 72], [136, 72]].forEach(p => R(p[0], p[1], 10, 2, '#fff'));
+  c4_bowl(82, 68, true, t); R(82, 67, 20, 1, '#fff');
+  // the crack, as a zigzag trail across the floor
+  const zz = [[4, 100], [24, 110], [44, 98], [64, 110], [84, 99], [104, 110], [124, 98], [152, 108]];
+  for (let i = 0; i < zz.length - 1; i++) for (let k = 0; k < 10; k++) { const u = k / 10; R(zz[i][0] + (zz[i + 1][0] - zz[i][0]) * u, zz[i][1] + (zz[i + 1][1] - zz[i][1]) * u, 3, 2, i % 2 ? '#7ec8ff' : '#a8dcff'); }
+  for (let i = 0; i < 40; i++) { const sp = 1 + (i % 3); R((rnd(i) * 160 + Math.sin(t / 600 + i) * 5) % 160, (rnd(i + 40) * 120 + t * .02 * sp) % 120, 2, 2, '#fff'); }
+};
+
+PROP.s13 = (t, st) => {
+  c4_clear();
+  R(57, 7, 42, 50, '#d9c79a'); R(58, 8, 40, 48, '#fff7e0'); R(76, 5, 4, 4, '#e8483c'); R(58, 8, 40, 3, '#e8483c'); R(58, 56, 40, 1, '#e8d9b0');
+  [0, 1, 2, 3].forEach(i => {
+    const y = 18 + i * 9, miss = !st && i % 2;
+    if (miss) { if (Math.sin(t / 200 + i) > 0) bmp(GLYPH['?'], 74, y - 1, 1, '#e8483c'); }
+    else if (!st || i % 2 === 0) R(64, y, 24, 2, i % 2 ? C4_INK : '#aaa');
+    else if (st === 'J') { R(64, y, 24, 2, C4_INK); R(64, y + 3, 24, 1, C4_INK); }
+    else for (let k = 0; k < 12; k++) R(64 + k * 2, y - (k % 3 === 1 ? 1 : 0), 2, 2, C4_INK);
+    if (st === 'J') check(91, y - 1, '#2fa84f');
+  });
+  c4_clock(112, 22, t);
+  if (!st) { [0, 1, 2, 3].forEach(i => R(62 + i * 10, 69 + (i % 2) * 2, 7, 7 - (i % 2) * 2, ['#c98a46', '#e8483c', '#ffd23f', '#d9b27a'][i])); }
+  if (st === 'J') [0, 1, 2, 3].forEach(i => { R(62 + i * 9, 67, 7, 9, ['#e8483c', '#ffd23f', '#59e0ff', '#7dffb0'][i]); R(63 + i * 9, 65, 5, 2, '#c5c9d6'); });
+  if (st === 'P') {
+    c4_bowl(82, 68, false, t, C4_COCOA);
+    [0, 1, 2, 3].forEach(i => { const u = ((t / 1000) + i / 4) % 1; R(60 + u * 30, 60 - Math.sin(u * 3.1416) * 28, 5, 5, ['#e8483c', '#ffd23f', '#59e0ff', '#fff'][i]); });
+    [[78, 56], [92, 52], [100, 58]].forEach(p => disc(p[0], p[1], 3, 'rgba(255,255,255,.85)'));
+  }
+};
+
+PROP.s14 = (t, st) => {
+  c4_clear();
+  if (st === 'I') {
+    // the door clicks shut; a quiet corner, one bowl, one small batch
+    R(110, 20, 34, 58, '#6e4526'); R(112, 22, 30, 54, '#8a5a3a'); R(115, 25, 24, 22, '#a06d44'); R(115, 51, 24, 22, '#a06d44'); R(137, 50, 3, 3, '#ffd23f');
+    R(119, 29, 16, 10, '#fff7e0'); bmp(HEART, 123, 31, 1, '#ff4f87'); R(121, 36, 12, 1, '#aaa');
+    c4_bowl(60, 68, false, t, C4_COCOA); c4_muffin(84, 66, 'good', false);
+    c4_taps(100, 62, t);
+    for (let k = 0; k < 3; k++) R(86 + k * 3 + Math.sin(t / 300 + k) * 2, 58 - ((t / 50 + k * 8) % 16), 2, 2, 'rgba(255,255,255,.6)');
+    return;
+  }
+  [70, 96, 122].forEach((cx, i) => {
+    for (let k = 0; k < 16; k++) { const a = k / 16 * 6.283 + t / 400; R(cx + Math.cos(a) * 11, 46 + Math.sin(a) * 11, 2, 2, k % 2 ? '#59e0ff' : '#c9a7ff'); }
+    drawDuck(cx - 8, 36 + Math.round(Math.sin(t / 250 + i)) * 2, 1, { tint: ['#ffd23f', '#ffb3d9', '#8ecbff'][i], still: true });
+    if (st === 'E') { R(cx - 4, 31, 8, 5, '#fff'); R(cx - 3, 28, 6, 3, '#fff'); R(cx - 2, 26, 4, 2, '#fff'); }
+  });
+  if (st === 'E') {
+    // flour party on the counter
+    for (let i = 0; i < 3; i++) disc(66 + i * 12, 70 - (t / 90 + i * 7) % 8, 2, 'rgba(255,255,255,.85)');
+    // the apron that nobody wore: faint outline, blue ribbon tie
+    const ph = Math.floor(t / 260);
+    for (let y = 22; y <= 50; y++) {
+      const l = y < 31 ? 141 : y < 34 ? 138 : 137, r = y < 31 ? 148 : y < 34 ? 151 : 152;
+      R(l, y, r - l + 1, 1, 'rgba(157,180,216,.28)');
+      if ((y + ph) % 3) { R(l, y, 1, 1, '#9db4d8'); R(r, y, 1, 1, '#9db4d8'); }
+    }
+    for (let x = 137; x <= 152; x++) if ((x + ph) % 3) R(x, 50, 1, 1, '#9db4d8');
+    R(141, 17, 1, 5, '#9db4d8'); R(148, 17, 1, 5, '#9db4d8'); R(141, 17, 8, 1, '#9db4d8');
+    R(140, 12, 10, 2, '#555'); R(144, 14, 3, 3, '#555');
+    c4_ribbon(144, 38);
+    for (let i = 0; i < 16; i++) R(rnd(i) * 160, (t * .04 * (1 + i % 3) + rnd(i + 2) * 90) % 90, 2, 5, ['#ff6fb5', '#ffd23f', '#59e0ff', '#7dffb0'][i % 4]);
+  }
+};
+
+PROP.s15 = (t, st) => {
+  c4_clear();
+  c4_ovenGlass(t, 300);
+  // backward timer: counts DOWN while the oven sulks
+  c4_timer(66, 10, t);
+  c4_clock(112, 22, t);
+  // glowing batter
+  const gl = .5 + .5 * Math.sin(t / 300);
+  for (let r = 15; r > 6; r -= 3) disc(72, 66, r, 'rgba(255,228,92,' + (.1 + .06 * gl) + ')');
+  c4_bowl(62, 68, false, t, '#ffd23f'); R(66, 66, 4, 1, '#fff8c0');
+  if (st === 'S') {
+    // thermometer standing in the batter, a taste spoon, a tick
+    R(77, 46, 3, 22, '#fff'); R(77, 56, 3, 12, '#e8483c'); disc(78, 68, 3, '#e8483c'); check(84, 48, '#2fa84f');
+    R(90, 68, 8, 3, '#c5c9d6'); disc(99, 69, 3, C4_COCOA);
+  }
+  if (st === 'N') {
+    for (let i = 0; i < 6; i++) sparkAt(64 + (i * 7) % 22, 58 - ((t / 30 + i * 12) % 40), t, '#ffe45c', i);
+    bubble(80, 34, 22, 18); c4_muffin(86, 37, 'good', false); sparkAt(104, 38, t, '#ffd23f', 3);
+  }
+};
+
+PROP.s16 = (t, st) => {
+  c4_clear();
+  const bx = 56;
+  if (!st) {
+    [0, 1, 2].forEach(i => c4_muffin(bx + i * 13, 66, 'burnt', false));
+    c4_smoke(bx + 4, 60, t, 3);
+    glitchBlob(84 + Math.round(Math.sin(t / 200) * 3), 32, t);
+    // the clean pan, sliding in from the goose: speed lines, a glint
+    const k = Math.floor(t / 150) % 3;
+    R(90, 71, 14, 5, '#6f7488'); R(91, 72, 12, 3, '#9aa0b3'); R(92, 72, 5, 1, '#fff'); R(89, 70, 16, 1, '#c5c9d6');
+    R(86 - k * 2, 73, 3, 1, '#fff'); R(84 - k * 2, 75, 4, 1, 'rgba(255,255,255,.7)');
+    sparkAt(98, 70, t, '#fff', 1);
+  }
+  if (st === 'T') {
+    [0, 1, 2].forEach(i => c4_muffin(bx + i * 13, 66, 'gold', false));
+    // the culprit dial, circled
+    disc(112, 30, 10, '#c5c9d6'); disc(112, 30, 8, '#2b1d3a'); R(112, 24, 2, 7, '#ff3b3b'); R(112, 30, 6, 2, '#ff3b3b');
+    R(100, 18, 24, 1, '#ff3b3b'); R(100, 42, 24, 1, '#ff3b3b'); R(100, 18, 1, 25, '#ff3b3b'); R(123, 18, 1, 25, '#ff3b3b');
+    R(60, 14, 28, 36, '#fff7e0'); [0, 1, 2].forEach(i => { word(String(i + 1), 62, 18 + i * 9, 1, '#555'); R(68, 19 + i * 9, 16 - i * 3, 3, '#59e0ff'); });
+    check(64, 44, '#2fa84f');
+  }
+  if (st === 'F') {
+    [0, 1, 2].forEach(i => {
+      const x = bx + i * 13; c4_muffin(x, 66, 'burnt', i === 1);
+      R(x + 2, 70, 2, 2, '#fff'); R(x + 6, 70, 2, 2, '#fff'); R(x + 4, 73, 2, 1, '#fff'); R(x + 3, 70, 1, 1, '#2a1a14'); R(x + 7, 70, 1, 1, '#2a1a14');
+    });
+    c4_chocEye(84, 34, t);
+    bmp(HEART, 62, 36, 2, '#ff4f87'); bmp(HEART, 98, 22, 1, '#ff4f87');
+    [[56, 46], [92, 50]].forEach((p, i) => sparkAt(p[0], p[1], t, '#fff', i));
+  }
+};
+
+
+// ---- chapter 5 helpers (c5_) ----
+// 9x5 duck print; the left foot (nick=true) has its left toe clipped
+function c5_foot(x, y, col, nick) {
+  bmp(nick ? ['000010001', '000010010', '001111100', '000111000', '000010000']
+           : ['100010001', '010010010', '001111100', '000111000', '000010000'], x, y, 1, col);
+}
+function c5_trail(x0, n, y, col, nick, step) {
+  for (let i = 0; i < n; i++) c5_foot(x0 + i * step, y + (i % 2) * 5, col, nick && i % 2 === 0);
+}
+// faint outline of the Second Duck (Pip-shaped gap) with a scrap of blue ribbon
+function c5_outline(x, y, s, t, fill, flip) {
+  const a = g.globalAlpha; g.globalAlpha = .8 + .2 * Math.sin(t / 420);
+  for (let r = 0; r < 16; r++) for (let c = 0; c < 16; c++) {
+    if (DUCK[r][c] === '.') continue;
+    const e = r === 0 || r === 15 || c === 0 || c === 15 || DUCK[r - 1][c] === '.' || DUCK[r + 1][c] === '.' || DUCK[r][c - 1] === '.' || DUCK[r][c + 1] === '.';
+    const px = x + (flip ? 15 - c : c) * s;
+    if (e) { R(px + 1, y + r * s + 1, s, s, '#3b4a8a'); R(px, y + r * s, s, s, '#ffffff'); } else R(px, y + r * s, s, s, fill ? 'rgba(255,255,255,.6)' : 'rgba(150,170,240,.3)');
+  }
+  const bx = flip ? x + 6 * s : x + 8 * s;
+  R(bx, y - s, s, 2 * s, '#59a0ff'); R(bx + 2 * s, y - s, s, 2 * s, '#59a0ff'); R(bx + s, y, s, s, '#59a0ff');
+  g.globalAlpha = a;
+}
+// reflection in ice: lag in ms (0 = exactly in sync, which is the creepy part). vertical=true mirrors upside down
+function c5_mirror(x, y, s, axisY, lag, t, tint, alpha, vertical, still) {
+  const a = g.globalAlpha; g.globalAlpha = alpha; g.save();
+  if (vertical) { g.translate(0, 2 * axisY); g.scale(1, -1); }
+  drawDuck(x, y, s, { tint, flip: !vertical, t: t - lag, still: !!still });
+  g.restore(); g.globalAlpha = a;
+}
+function c5_ice(x, y, w, h, t) {
+  R(x, y, w, h, '#9fd6ff'); R(x, y, w, 1, '#e6f6ff'); R(x, y + h - 1, w, 1, '#6fb0e6');
+  for (let i = 0; i < 3; i++) R(x + ((t / 40 + i * w / 3) % (w - 6)), y + 2 + i * 3, 6, 1, 'rgba(255,255,255,.75)');
+}
+function c5_glow(x, y, t) {
+  const k = 1 + Math.sin(t / 318) * .08;
+  for (let i = 0; i < 18; i++) { const a = i / 18 * 6.283; R(x + Math.cos(a) * 25 * k, y + Math.sin(a) * 22 * k, 2, 2, i % 2 ? 'rgba(255,217,128,.75)' : 'rgba(255,240,190,.55)'); }
+}
+function c5_puff(x, y, t) {
+  for (let i = 0; i < 3; i++) { const k = ((t / 70 + i * 9) % 27) / 27; R(x + k * 12, y - k * 9 + i, 2, 2, 'rgba(255,255,255,' + (0.9 - k * .8).toFixed(2) + ')'); }
+}
+function c5_pole(x, y, h, col) { R(x, y, 2, h, '#5b3a1a'); R(x + 2, y, 6, 4, col); R(x + 2, y + 4, 4, 1, col); R(x, y - 1, 2, 1, '#fff'); }
+
+// ---- beat props ----
+PROP.b5_prints = (t, st) => {
+  c5_pole(8, 66, 30, '#ff8a1f'); c5_pole(146, 62, 34, '#ff8a1f');
+  // yours (blue-grey), then a second set that begins exactly where yours end (lavender, left foot nicked)
+  c5_trail(8, 5, 101, '#6f93c4', false, 11);
+  c5_trail(66, 7, 101, '#a58be0', true, 11);
+  // the nick, pointed out gently
+  sparkAt(70, 100, t, '#fff'); sparkAt(81, 110, t, '#fff', 3);
+  // hand-off: a dotted line where your prints end and theirs begin
+  for (let y = 96; y < 118; y += 3) R(63, y, 1, 1, 'rgba(255,255,255,.8)');
+  c5_foot(66, 101, '#fff', true); R(66, 101, 1, 1, '#ff4f87');
+  // slip marks: three skids on the ice
+  [0, 1, 2].forEach(i => { for (let k = 0; k < 11; k++) R(96 + k + i, 88 + i * 2 + (k * k) / 40, 1, 1, '#5d86b8'); });
+  R(108, 92, 3, 1, '#fff'); R(94, 94, 2, 1, '#fff');
+  // the gap: a faint small duck outline with a blue ribbon, standing just off the trail
+  c5_outline(122, 70, 1, t, false, true);
+  R(123, 87, 14, 1, 'rgba(60,80,140,.25)');
+  c5_puff(56, 66, t);
+};
+PROP.b5_ask = (t, st) => {
+  glitchBlob(80, 62, t);
+  R(76, 58, 9, 3, '#7d3a8f'); R(76, 58, 9, 1, '#2b1d3a');           // heavy eyelid: half closed
+  bubble(88, 36, 13, 11); word('?', 93, 38, 1, '#6b5bd6');
+  if (Math.sin(t / 700) > .5) { R(98, 66, 2, 2, '#59e0ff'); R(102, 62, 2, 2, '#ff6fb5'); }  // *hic*
+  [[40, 40], [120, 52], [60, 30]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+  c5_trail(44, 6, 104, '#6f93c4', false, 11);
+};
+PROP.b5_slip = (t, st) => {
+  // last switchback ledge
+  R(0, 93, 160, 3, '#f3faff'); R(0, 96, 160, 1, '#8fb6e8');
+  for (let i = 0; i < 6; i++) R(((t * .3 + i * 29) % 190) - 12, 18 + (i * 11) % 44, 16, 1, 'rgba(255,255,255,.7)');   // wind, all sky
+  // ice sheet with your reflection (lag 0)
+  c5_ice(10, 97, 66, 22, t);
+  c5_mirror(22, 60, 2, 94.5, 0, t, '#bfe3ff', .38, true);
+  // the new nicked print beside the skid
+  for (let k = 0; k < 12; k++) R(30 + k * 2, 104 + k * .6, 2, 1, '#5d86b8');
+  c5_foot(22, 106, '#4a6fa6', true); sparkAt(24, 105, t, '#fff');
+  // the wing that locks around yours: same size, pale lavender
+  R(54, 72, 50, 5, '#c9a7ff'); R(54, 72, 50, 1, '#ecdcff'); R(54, 77, 50, 1, '#8e72d0');
+  for (let i = 0; i < 6; i++) { R(60 + i * 7, 77, 5, 2, '#c9a7ff'); R(60 + i * 7, 79, 5, 1, '#8e72d0'); }   // feather tips
+  R(50, 70, 8, 9, '#c9a7ff'); R(50, 70, 8, 1, '#ecdcff'); R(48, 71, 3, 7, '#8e72d0');
+  sparkAt(55, 69, t, '#fff'); sparkAt(98, 70, t, '#fff', 2);
+  c5_glow(80, 44, t);
+  R(36, 48, 2, 8, '#fff'); R(36, 58, 2, 2, '#fff');                      // "!"
+};
+PROP.b5_taps = (t, st) => {
+  R(0, 93, 160, 3, '#f3faff'); R(0, 96, 160, 1, '#8fb6e8');
+  c5_glow(80, 44, t);
+  // two taps on the wing: yes
+  const ph = Math.floor(t / 420) % 4;
+  [[56, 71], [56, 79]].forEach(([x, y], i) => {
+    if (ph === i * 2 || ph === i * 2 + 1 && false) { R(x, y, 3, 3, '#fff'); R(x + 4, y - 2, 1, 2, '#fff'); R(x + 4, y + 3, 1, 2, '#fff'); R(x + 6, y, 2, 1, '#fff'); }
+  });
+  R(58, 67, 2, 2, ph < 2 ? '#fff' : 'rgba(255,255,255,.3)');
+  // the goose's wings, clenched and trembling
+  const sh = Math.round(Math.sin(t / 45));
+  R(97 + sh, 68, 4, 12, '#c9a7ff'); R(97 + sh, 68, 1, 12, '#8e72d0'); R(135 - sh, 68, 4, 12, '#c9a7ff'); R(138 - sh, 68, 1, 12, '#8e72d0');
+  R(96, 64 + sh, 2, 2, '#c9a7ff'); R(138, 64 - sh, 2, 2, '#c9a7ff');
+  arcDots(100, 60, 60, 52, 6, 6, 'rgba(255,217,128,.55)');
+  c5_trail(24, 4, 104, '#6f93c4', false, 11); c5_trail(70, 5, 104, '#a58be0', true, 11);
+};
+
+// ---- scenes ----
+PROP.s17 = (t, st) => {
+  c5_ice(36, 94, 114, 14, t);
+  // skid marks: this is slip number three
+  [0, 1, 2].forEach(i => { for (let k = 0; k < 14; k++) R(64 + k * 2 - i * 3, 100 + i * 2 + (k > 8 ? 1 : 0), 2, 1, '#5d86b8'); });
+  // the Second Duck, faint, always already reaching
+  c5_outline(100, 58, 2, t, st === 'F', true);
+  if (!st) { R(96, 72, 4, 2, 'rgba(255,255,255,.6)'); R(92, 70, 4, 1, 'rgba(255,255,255,.4)'); }
+  if (st === 'F') { R(94, 72, 8, 3, 'rgba(255,255,255,.6)'); R(82, 70, 12, 3, '#c9a7ff'); }
+  const wob = st ? Math.sin(t / 60) * .04 : Math.sin(t / 260) * .5;
+  drawDuck(64, 58, 2, { tint: '#c9a7ff', still: true, rot: wob, t });
+  if (!st) {
+    [0, 1, 2].forEach(i => R(56, 62 + i * 4, 6, 1, 'rgba(255,255,255,.85)'));
+    emote('E', 66, 34);
+    sweat(92, 56, t);
+  }
+  if (st === 'F') {
+    R(54, 72, 10, 4, '#ffd23f'); R(54, 72, 10, 1, '#fff1c9'); R(60, 71, 10, 4, '#c9a7ff');     // two wings, one grip
+    bmp(HEART, 70, 36 + Math.round(Math.sin(t / 300) * 2), 2, '#ff4f87'); bmp(HEART, 92, 44 + Math.round(Math.sin(t / 300 + 2) * 2), 1, '#ff8fb6');
+    [[60, 44], [100, 40]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+    [0, 1, 2].forEach(i => R(62 + i * 12, 53 - (i % 2) * 2, 2, 2, '#ffe45c'));       // ha ha ha
+  }
+  if (st === 'T') {
+    // 1-2-3 steps painted on the grippiest line, with flags
+    [[56, 98, 1], [76, 98, 2], [96, 98, 3]].forEach(([x, y, n]) => { c5_foot(x, y, '#5d86b8', false); word(String(n), x + 3, y - 8, 1, '#ff8a1f'); });
+    [[40, 80], [90, 84], [142, 84]].forEach(([x, y]) => c5_pole(x, y, 14, '#ff8a1f'));
+    c5_foot(70, 108, '#4a6fa6', true); sparkAt(72, 107, t, '#fff');                   // the nick
+    c5_puff(76, 58, t);
+  }
+};
+
+PROP.s18 = (t, st) => {
+  // the path splits at a signpost: left board is the plan (checklist), right board is the shortcut (bolt)
+  R(79, 36, 3, 46, '#5b3a1a'); R(78, 35, 5, 2, '#fff');
+  R(60, 42, 20, 9, '#c98a46'); R(56, 44, 4, 5, '#c98a46'); R(60, 42, 20, 1, '#e3b06d');
+  [0, 1, 2].forEach(i => R(64, 44 + i * 2, 11 - i * 2, 1, '#3b2410'));
+  R(82, 56, 20, 9, '#c98a46'); R(102, 58, 4, 5, '#c98a46'); R(82, 56, 20, 1, '#e3b06d');
+  R(90, 57, 2, 3, '#ffe45c'); R(88, 60, 5, 2, '#ffe45c'); R(88, 62, 2, 3, '#ffe45c');
+  // the planned route: flags climbing the switchbacks
+  [[16, 50], [30, 44], [46, 40], [62, 34]].forEach(([x, y], i) => { R(x, y, 1, 8, '#5b3a1a'); R(x + 1, y, 5, 3, st === 'J' ? '#2fa84f' : '#ff8a1f'); });
+  dots(10, 58, 66, 38, 9, 'rgba(255,255,255,.8)');
+  // the shortcut: a sheet of ice with a living crack
+  const w = 2 + (t / 500) % 4;
+  R(88, 86, 62, 22, '#9fd6ff'); R(88, 86, 62, 1, '#e6f6ff'); R(88, 107, 62, 1, '#6fb0e6');
+  for (let x = 88; x < 150; x += 3) { const yy = 95 + [0, 2, 1, 3, 1, 0, 2][((x - 88) / 3 | 0) % 7]; R(x, yy, 3, 1 + (w > 3.5 ? 1 : 0), '#1f3566'); R(x, yy - 1, 3, 1, '#6fb0e6'); }
+  R(112, 88, 1, 6, '#1f3566'); R(128, 96, 1, 8, '#1f3566'); R(100, 97, 1, 7, '#1f3566');
+  R(78, 100, 8, 3, '#e8f4ff'); R(140, 90, 8, 3, '#e8f4ff');
+  if (!st) { R(104, 88, 2, 2, '#59a0ff'); R(104, 90, 2, 1, '#59a0ff'); }              // a scrap of ribbon snagged at the crack
+  if (st === 'J') {
+    R(112, 24, 30, 22, '#fff7e0'); R(112, 24, 30, 2, '#e3b06d');
+    dots(116, 40, 136, 32, 5, '#2fa84f'); check(133, 30, '#2fa84f'); R(116, 30, 12, 1, '#b8a27a'); R(116, 34, 8, 1, '#b8a27a');
+    c5_trail(14, 6, 100, '#4a6fa6', false, 12); c5_trail(14, 6, 108, '#a58be0', true, 12);
+  }
+  if (st === 'P') {
+    arcDots(56, 90, 124, 92, 16, 14, '#ffe45c'); sparkAt(126, 88, t, '#fff'); sparkAt(92, 68, t, '#ffe45c', 2);
+    [[96, 80], [102, 76], [110, 82], [120, 78]].forEach(([x, y]) => R(x, y, 3, 2, '#fff'));       // ice chips
+    c5_foot(118, 99, '#2f4f86', false); c5_foot(134, 104, '#2f4f86', false);
+    c5_foot(60, 108, '#2f4f86', false);
+    c5_foot(106, 110, '#7a5cc8', true);                                                     // the second set, a beat late
+    c5_foot(120, 110, '#7a5cc8', true);
+  }
+};
+
+PROP.s19 = (t, st) => {
+  // summit slab of ice acting as a mirror
+  R(60, 40, 46, 56, '#6f9fd8'); R(62, 42, 42, 52, '#a9d8ff'); R(62, 42, 42, 3, '#e9f6ff'); R(60, 94, 46, 2, '#e9f6ff');
+  for (let i = 0; i < 4; i++) R(66 + ((t / 30 + i * 10) % 28), 48 + i * 10, 6, 1, 'rgba(255,255,255,.6)');
+  // reflection: lag exactly 0, i.e. wrong
+  c5_mirror(68, 60, 2, 0, 0, t, '#bfe3ff', st === 'N' ? .4 : .75, false, st === 'N');
+  if (!st) { for (let k = 0; k < 6; k++) R(56 + k * 2, 70, 1, 1, '#ffffff'); sparkAt(100, 48, t, '#59e0ff'); sparkAt(66, 50, t, '#ff6fb5', 2); }
+  // wind-whipped snow, sideways
+  for (let i = 0; i < 9; i++) R(((t * .4 + i * 23) % 190) - 14, 12 + i * 11, 14, 1, 'rgba(255,255,255,.75)');
+  // summit flag on a pole
+  c5_pole(130, 40, 40, '#ff8a1f');
+  if (st === 'S') {
+    [[66, 20], [80, 20], [94, 20]].forEach(([x, y], i) => {
+      R(x, y, 12, 12, '#fff'); R(x, y, 12, 1, '#8fb6e8'); R(x, y + 11, 12, 1, '#8fb6e8');
+      if (i === 0) c5_foot(x + 1, y + 3, '#4a6fa6', true);
+      if (i === 1) { R(x + 3, y + 3, 6, 6, '#a9d8ff'); R(x + 3, y + 3, 2, 2, '#fff'); R(x + 5, y + 5, 1, 2, '#4a6fa6'); }
+      if (i === 2) { R(x + 1, y + 4, 4, 4, '#ffd23f'); R(x + 7, y + 4, 4, 4, '#c9a7ff'); }
+      check(x + 3, y - 8, '#2fa84f');
+    });
+  }
+  if (st === 'N') {
+    arcDots(54, 64, 70, 64, 8, 5, 'rgba(255,240,150,.85)');
+    [[56, 30], [100, 30], [112, 72], [80, 30]].forEach(([x, y], i) => sparkAt(x, y, t, '#ffe45c', i));
+    bmp(HEART, 82, 28, 1, '#ff8fb6');
+  }
+};
+
+PROP.s20 = (t, st) => {
+  // the Egg between them, cracking; five ticks, four lit dim blue
+  const calm = st === 'I';
+  drawEgg(80, 14, 2, 0, st === 'E' ? 1 : .8, t);
+  for (let i = 0; i < 5; i++) { const a = -1.5708 + i * 1.2566; R(80 + Math.cos(a) * 27 - 1, 32 + Math.sin(a) * 25 - 1, 3, 3, i < 4 ? '#3f64d0' : '#8fa0cf'); }
+  // the goose grips it
+  arcDots(106, 66, 94, 42, 5, 8, '#55496f');
+  if (!st || st === 'E') { sweat(100, 58, t); R(102, 50 + Math.round(Math.sin(t / 50)), 1, 4, '#59e0ff'); }
+  // the Glitch, mid-lunge; frozen on E; patient on I
+  if (st === 'E') {
+    glitchBlob(86, 76, 0);
+    [[64, 64], [94, 66], [70, 90], [92, 88]].forEach(([x, y], i) => { R(x, y, 2, 2, '#e8f8ff'); sparkAt(x + 4, y - 4, t, '#fff', i); });
+    bubble(94, 52, 11, 10); word('?', 97, 54, 1, '#6b5bd6');
+    for (let k = 0; k < 2; k++) { const r = (t / 12 + k * 20) % 40; for (let a = 0; a < 16; a++) { const an = a / 16 * 6.283; R(40 + Math.cos(an) * r, 70 + Math.sin(an) * r * .6, 2, 2, 'rgba(255,228,92,.8)'); } }
+  } else if (st === 'I') {
+    glitchBlob(78, 76, t / 4);
+    R(73, 72, 9, 3, '#7d3a8f'); R(73, 72, 9, 1, '#2b1d3a');
+    arcDots(46, 64, 70, 70, 8, 8, 'rgba(255,255,255,.85)'); arcDots(46, 62, 102, 62, 14, 14, 'rgba(255,255,255,.7)');
+    R(94, 58, 2, 2, '#8e72d0'); R(97, 62, 2, 2, '#8e72d0');
+  } else {
+    glitchBlob(66, 76 + Math.round(Math.sin(t / 140)), t);
+    dots(70, 70, 76, 48, 5, 'rgba(255,47,176,.7)');
+    [[40, 30], [120, 28]].forEach(([x, y], i) => sparkAt(x, y, t, '#fff', i));
+  }
+  R(80, 38, 1, 8, '#fff'); // crack glint
+};
+
+
+const fN_BLUE = '#59a0ff';
+function fN_tint() {
+  try { return TINT[temperament(resultType(run))] || '#ffd23f'; } catch (e) { return '#ffd23f'; }
+}
+// small outline duck (Pip-sized shape), fill 0..1 turns the outline white
+function fN_outline(x, y, fill, t) {
+  const c = fill > .02 ? 'rgba(255,255,255,' + (.35 + .65 * fill) + ')' : 'rgba(200,220,255,.55)';
+  if (fill > .02) { R(x + 2, y + 5, 9, 6, 'rgba(255,255,255,' + fill + ')'); disc(x + 8, y + 3, 3, 'rgba(255,255,255,' + fill + ')'); }
+  R(x + 1, y + 4, 1, 8, c); R(x + 11, y + 4, 1, 8, c); R(x + 2, y + 12, 9, 1, c); R(x + 2, y + 4, 3, 1, c);
+  R(x + 5, y, 6, 1, c); R(x + 5, y + 1, 1, 3, c); R(x + 11, y + 1, 1, 3, c); R(x + 12, y + 2, 2, 1, c);
+  R(x + 6, y - 1, 2, 2, fN_BLUE); R(x + 8, y - 1, 1, 1, fN_BLUE); R(x + 9, y - 1, 2, 2, fN_BLUE);
+}
+// one glowing tick slot; state 0 hollow, 1 dim blue, 2 gold
+function fN_slot(x, y, state, t) {
+  if (state === 0) { R(x - 3, y - 3, 7, 1, '#9fb8d8'); R(x - 3, y + 3, 7, 1, '#9fb8d8'); R(x - 3, y - 2, 1, 5, '#9fb8d8'); R(x + 3, y - 2, 1, 5, '#9fb8d8'); if (Math.sin(t / 300) > 0) R(x, y, 1, 1, '#9fb8d8'); return; }
+  const c = state === 2 ? '#ffd23f' : '#6f86b0';
+  disc(x, y, 3, c); if (state === 2) sparkAt(x, y - 6, t, '#fff7c0', x);
+}
+function fN_print(x, y, notch, c) { R(x, y, 2, 3, c); if (!notch) R(x + 3, y + 1, 2, 3, c); else R(x + 3, y + 2, 2, 2, c); }
+
+PROP.f_table = (t) => {
+  R(20, 88, 120, 4, '#6b4a3a'); R(20, 88, 120, 1, '#8a6450'); R(24, 92, 5, 18, '#4a3328'); R(131, 92, 5, 18, '#4a3328');
+  R(70, 86, 20, 2, 'rgba(0,0,0,.25)');
+  // little egg stand: velvet cushion on a stem
+  R(75, 65, 10, 21, '#8a6450'); R(75, 65, 3, 21, '#a07860'); R(69, 83, 22, 3, '#6b4a3a');
+  R(66, 60, 28, 5, '#8c3a66'); R(66, 60, 28, 1, '#c0588f'); R(68, 65, 24, 1, '#5c2444');
+  // the Glitch has been nibbling the table edge
+  for (let i = 0; i < 6; i++) R(128 + (i % 3) * 3, 88 + (i >> 1), 2, 2, (Math.floor(t / 150) + i) % 2 ? '#ff2fb0' : '#2fe0ff');
+};
+function fN_foot(x, y, left, c) { // 3x4 print; the left foot has a one-pixel nick
+  R(x, y + 2, 4, 3, c); R(x, y, 1, 2, c); R(x + 1.5, y - 1, 1, 2, c); R(x + 3, y, 1, 2, c); if (left) { R(x + 3, y + 4, 1, 1, '#e6f2ff'); R(x + 3, y + 3, 1, 1, '#e6f2ff'); }
+}
+PROP.f_prints = (t) => {
+  // two parallel trails: yours (cool grey-blue) and the goose's (lavender), same stride, left foot nicked
+  R(0, 94, 160, 26, 'rgba(255,255,255,.3)');
+  for (let i = 0; i < 12; i++) {
+    const L = i % 2 === 0, x = 18 + i * 10, o = L ? 0 : 3;
+    fN_foot(x, 99 + o, L, '#5d7fb5');
+    fN_foot(x, 108 + o, L, '#a58bd8');
+  }
+  if (Math.sin(t / 300) > 0) { R(36, 96, 8, 1, '#fff'); R(36, 105, 8, 1, '#fff'); R(36, 96, 1, 10, '#fff'); R(43, 96, 1, 10, '#fff'); R(36, 114, 8, 1, '#fff'); R(36, 114, 1, 1, '#fff'); sparkAt(46, 95, t, '#fff', 2); }
+  R(10, 100, 3, 2, '#6f8fbf'); R(10, 109, 3, 2, '#a58bd8');
+};
+PROP.f_reflect = (t) => {
+  // ice sheet with the reflection stepping out of it (lag shrinks to nothing)
+  R(20, 96, 120, 20, 'rgba(160,210,255,.4)'); R(20, 96, 120, 1, '#fff'); R(30, 104, 40, 1, 'rgba(255,255,255,.6)'); R(90, 110, 36, 1, 'rgba(255,255,255,.5)');
+  const rise = Math.min(1, (t % 4000) / 2200);
+  drawDuck(52 + rise * 2, 96 + (1 - rise) * 14, 1, { tint: '#c9a7ff', flip: true, still: true, t });
+  R(48, 96, 22, Math.round((1 - rise) * 15) + 1, 'rgba(160,210,255,.7)');
+  sparkAt(100, 104, t, '#fff', 2); sparkAt(34, 110, t, '#fff', 4);
+};
+PROP.f_notebook = (t) => {
+  // open ledger: five era lines, five dots, and the ribbon scrap used as a bookmark
+  R(48, 20, 62, 30, '#d7c19a'); R(49, 21, 30, 28, '#fff7e0'); R(79, 21, 30, 28, '#fff1cf'); R(78, 21, 2, 28, '#c9a070');
+  for (let i = 0; i < 5; i++) { R(53, 26 + i * 4, 20, 1, '#a89878'); R(84, 26 + i * 4, 18, 1, '#a89878'); }
+  const k = Math.floor(t / 500) % 7;
+  for (let i = 0; i < 5; i++) R(84 + i * 4, 25, 3, 3, i < k ? '#6f86b0' : '#d8cfb8');
+  R(78, 50, 3, 10, fN_BLUE); R(78, 60, 1, 2, fN_BLUE); R(80, 60, 1, 2, fN_BLUE);
+  sparkAt(82, 66, t, '#bfe0ff', 1);
+};
+function fN_glitchMini(x, y, t, lid) {
+  glitchBlob(x, y, t);
+  if (lid) { R(x - 6, y - 6, 13, 6, '#c13fd0'); R(x - 5, y, 11, 1, '#1b1030'); }
+}
+PROP.f_glitch = (t) => { fN_glitchMini(80, 84, t, 0); };
+PROP.f_glitchSleepy = (t) => { fN_glitchMini(80, 84, t, 1); };
+function fN_slotObj(i, x, y) {
+  if (i === 0) { R(x + 2, y + 6, 10, 2, '#b8864e'); R(x + 3, y + 3, 4, 3, '#e8483c'); R(x + 7, y + 3, 4, 3, '#fff'); R(x + 11, y + 3, 2, 4, fN_BLUE); }
+  else if (i === 1) { R(x + 3, y + 1, 8, 9, '#fff7e0'); R(x + 3, y + 1, 8, 2, '#ffb3d3'); R(x + 10, y - 5, 2, 7, fN_BLUE); R(x + 4, y + 7, 6, 3, '#9b6a3e'); }
+  else if (i === 2) { R(x + 2, y + 7, 11, 4, '#555'); R(x + 3, y + 7, 9, 1, '#999'); R(x + 7, y + 2, 2, 6, '#bbb'); disc(x + 8, y + 2, 2, '#e8483c'); }
+  else if (i === 3) { for (let r = 0; r < 5; r++) R(x + 2 + r, y + 4 + r, 12 - 2 * r, 1, r ? '#d9b27a' : '#f3d9a8'); R(x + 5, y + 2, 6, 2, '#6b3f1f'); R(x + 6, y - 2, 2, 5, fN_BLUE); }
+  else { fN_foot(x + 3, y + 3, true, '#e6f2ff'); fN_foot(x + 3, y + 8, false, '#e6f2ff'); fN_foot(x + 9, y + 4, false, '#cfe4ff'); fN_foot(x + 9, y + 9, true, '#cfe4ff'); }
+}
+PROP.f_outlines = (t) => {
+  // five eras, five empty seats: each outline duck wears the ribbon and fills in white, one after another
+  const cyc = t / 650;
+  for (let i = 0; i < 5; i++) {
+    const x = 11 + i * 29, fill = clamp(cyc - i, 0, 1);
+    R(x - 3, 40, 22, 14, 'rgba(120,150,210,.18)'); R(x - 3, 54, 22, 1, 'rgba(120,150,210,.5)');
+    fN_slotObj(i, x, 40);
+    if (fill < 1) drawPip(x, 14, 1, { outline: true, alpha: .9, t });
+    g.save(); g.globalAlpha = fill; drawPip(x, 14, 1, { still: true, t }); g.restore();
+    if (fill >= 1) sparkAt(x + 15, 12, t, '#fff', i);
+  }
+};
+PROP.f_nightlight = (t) => {
+  // the Glitch, shrunk to a sleepy spark, curled up next to the Egg's crack like a night-light
+  const p = .5 + .5 * Math.sin(t / 700);
+  disc(104, 50, 6, 'rgba(255,214,120,' + (0.22 + p * .2) + ')');
+  R(102, 49, 5, 4, '#ff2fb0'); R(103, 48, 3, 1, '#ff2fb0'); R(101, 50, 1, 2, '#2fe0ff'); R(107, 50, 1, 2, '#2fe0ff');
+  R(103, 50, 3, 1, '#2b1d3a');
+  const z = (t / 500) % 3;
+  R(110 + z * 2, 44 - z * 3, 3, 1, '#fff7c0'); R(112 + z * 2, 45 - z * 3, 1, 1, '#fff7c0'); R(110 + z * 2, 46 - z * 3, 3, 1, '#fff7c0');
+};
+PROP.f_pipGrow = (t) => {
+  // Pip pops to full size, the goose walks over and ties the ribbon scrap onto the bow, and both tails match
+  const big = t > 800, s = big ? 2 : 1, px = 36, py = big ? 60 : 76;
+  const tie = clamp((t - 1800) / 500, 0, 1);
+  const walk = clamp((t - 1000) / 800, 0, 1) - clamp((t - 2400) / 800, 0, 1);
+  const gx = 104 - walk * 30;
+  drawPip(px, py, s, { tied: tie >= 1, t });
+  drawDuck(gx, 60, 2, { tint: '#c9a7ff', flip: true, t, still: true });
+  if (tie < 1) { const sx = gx - 4 + (tie > 0 ? (px + 20 - gx + 4) * tie : 0), sy = 70 + (tie > 0 ? -12 * tie : 0); R(sx, sy, 2, 4, fN_BLUE); R(sx + 1, sy + 3, 1, 1, fN_BLUE); }
+  else { sparkAt(px + 24, 52, t, '#fff', 1); sparkAt(px + 8, 54, t, '#bfe0ff', 2); }
+  if (!big && Math.sin(t / 60) > 0) sparkAt(px + 8, 70, t, '#fff', 0);
+};
+PROP.f_gooseTint = (t) => {
+  // the goose wears your tint now, and answers with two taps on a wing (two for yes)
+  const tc = fN_tint();
+  drawDuck(104, 62, 2, { tint: tc, flip: true, t, bow: fN_BLUE });
+  const k = Math.floor(t / 450) % 3;
+  if (k === 1) { R(98, 78, 2, 2, '#fff'); R(97, 76, 1, 1, '#fff'); R(100, 76, 1, 1, '#fff'); }
+  if (k === 2) { R(98, 78, 2, 2, '#fff'); R(97, 80, 1, 1, '#fff'); R(100, 80, 1, 1, '#fff'); R(96, 77, 1, 1, '#ffd23f'); }
+  sparkAt(140, 66, t, '#fff7c0', 3);
+};
+PROP.f_one = (t) => {
+  // the count: 5 4 3 2 stay cold, then 1 finally lights gold, and the goose stands in your tint
+  const tc = fN_tint();
+  for (let i = 0; i < 4; i++) word(String(5 - i), 31 + i * 20, 20, 3, '#6f86b0');
+  const on = t > 1500, p = clamp((t - 1500) / 400, 0, 1);
+  word('1', 111, 20, 3, on ? '#ffd23f' : 'rgba(255,210,63,.15)');
+  if (on) { sparkAt(108, 18, t, '#fff7c0', 1); sparkAt(122, 36, t, '#fff7c0', 3); R(104, 17, 3, 1, '#fff7c0'); R(121, 17, 2, 1, '#fff7c0'); }
+  R(50, 92, 60, 1, 'rgba(255,255,255,.2)');
+  drawDuck(64, 60, 2, { tint: tc, t, bow: fN_BLUE });
+  const k = Math.floor(t / 450) % 3;
+  if (k) { R(60, 78, 2, 2, '#fff'); R(59, 76, 1, 1, '#fff'); R(62, 76, 1, 1, '#fff'); }
+};
+PROP.f_lights = (t) => {
+  // five lights rise out of the Egg and settle into five badge sockets
+  for (let i = 0; i < 5; i++) {
+    const x = 24 + i * 28, ph = ((t / 1800 + i * .17) % 1);
+    const land = clamp(t / 1500 - i * .25, 0, 1);
+    disc(x, 14, 6, '#8a7a9a'); disc(x, 14, 5, '#1b1030'); if (land > 0 && land < 1) disc(x, 14, 5, 'rgba(255,210,63,' + land * .5 + ')');
+    if (land >= 1) disc(x, 14, 4, '#ffd23f');
+    else { const y = 70 - ph * 52; disc(x, y, 2, '#ffd23f'); sparkAt(x, y - 4, t, '#fff', i); }
+  }
+};
+PROP.f_egg6 = (t) => {
+  // warm gold rings and a little heartbeat ripple out of the Egg
+  for (let i = 0; i < 3; i++) { const k = ((t / 1600) + i / 3) % 1, r = 18 + k * 34; g.save(); g.globalAlpha = (1 - k) * .5; for (let a = 0; a < 40; a++) { const an = a / 40 * 6.283; R(80 + Math.cos(an) * r, 44 + Math.sin(an) * r * .8, 1, 1, '#ffd23f'); } g.restore(); }
+  const b = Math.sin(t / 160) > .6 ? 1 : 0; bmp(HEART, 76 - b, 80 - b, 2 + b, '#ff7aa8');
+};
+PROP.f_ticket = (t) => {
+  // the ticket, floating: desert mesas, a sun, and a sixth hollow slot
+  const bob = Math.round(Math.sin(t / 400));
+  const x = 98, y = 24 + bob;
+  R(x, y, 48, 30, '#f4e3b8'); R(x, y, 48, 2, '#e0c487'); R(x, y + 28, 48, 2, '#e0c487');
+  R(x + 32, y + 3, 1, 24, '#d9a066');
+  R(x + 4, y + 4, 24, 16, '#ffb37a'); R(x + 4, y + 14, 24, 6, '#c9693a'); disc(x + 20, y + 10, 3, '#fff1a8');
+  R(x + 6, y + 12, 8, 8, '#8f3f2a'); R(x + 8, y + 10, 4, 2, '#8f3f2a'); R(x + 16, y + 15, 10, 5, '#a64d30');
+  for (let i = 0; i < 6; i++) { const cx = x + 4 + i * 4; if (i < 5) R(cx, y + 23, 3, 3, '#e0a82e'); else if (Math.sin(t / 300) > 0) R(cx, y + 23, 3, 3, '#9fb8d8'); else R(cx, y + 23, 3, 1, '#9fb8d8'); }
+  R(x + 35, y + 6, 8, 2, '#c9a070'); R(x + 35, y + 10, 8, 2, '#c9a070'); R(x + 35, y + 14, 5, 2, '#c9a070');
+  sparkAt(x + 50, y - 2, t, '#fff7c0', 1);
+};
+PROP.f_notebook6 = (t) => {
+  // the goose's ledger: five gold lines, the sixth gets written in (a mountain doodle and a boot print)
+  R(16, 22, 74, 66, '#fff7e0'); R(16, 22, 74, 3, '#c9a070'); R(16, 22, 3, 66, '#c9a070'); R(88, 24, 2, 62, '#e8d9b4');
+  for (let i = 0; i < 5; i++) { R(30, 33 + i * 8, 52, 1, '#a89878'); R(23, 31 + i * 8, 4, 4, '#ffd23f'); }
+  R(23, 71, 4, 4, fN_BLUE);
+  const w = clamp((t - 600) / 1800, 0, 1);
+  R(30, 74, Math.round(52 * w), 2, '#2b1d3a');
+  if (w > .4) { tri(56, 62, 11, '#c9693a', 1.6); tri(68, 65, 8, '#8f3f2a', 1.6); }
+  if (w >= 1) { disc(76, 66, 2, '#e0a82e'); sparkAt(84, 68, t, '#fff', 1); }
+};
+// the Second Duck, restored in a badge: white Pip with the ribbon, glowing
+function fN_badgeDuck(x, y) {
+  [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dx, dy]) => drawDuck(x + dx, y + dy, 1, { tint: '#4a3f8a', still: true, t: 0 }));
+  drawPip(x, y, 1, { tied: true, still: true, t: 0 });
+  R(x + 15, y - 1, 1, 3, '#fff'); R(x + 14, y, 3, 1, '#fff');
+}
+
+
 /* ---------- state / view ---------- */
-let view = {}, run, chIdx = 0, queue = [], qi = 0, cur = null, busy = false, TR = null, typer = null;
-function setView(v) { view = Object.assign({ mode: 'scene', bg: 'void', duck: null, rival: null, pip: false, egg: null, hero: null, duo: null, glitch: 0, shake: 0 }, v); }
+let view = {}, run, chIdx = 0, queue = [], qi = 0, cur = null, busy = false, TR = null, typer = null, lastLit = 0;
+function setView(v) { view = Object.assign({ mode: 'scene', bg: 'void', duck: null, rival: null, pip: null, egg: null, hero: null, duo: null, glitch: 0, shake: 0, prop: null, state: null, shard: null, beatT0: performance.now() }, v); }
 const duckView = () => ({ x: 22, y: 60, s: 2, acc: leaders(run), tint: '#ffd23f', wobble: chIdx === 4 });
-const stability = () => run ? Math.max(8, 100 - run.history.length * 4) : 100;
-const glitchLevel = () => clamp((100 - stability()) / 100 * .8, 0, .7);
+const stability = () => run ? (run.hatched ? 100 : Math.max(8, 100 - run.history.length * 4)) : 100;
+const glitchLevel = () => run && run.hatched ? 0 : clamp((100 - stability()) / 100 * .8, 0, .7);
+const asList = x => Array.isArray(x) ? x.filter(Boolean) : x ? [x] : [];
+const finFn = k => FIN && typeof FIN[k] === 'function' ? FIN[k] : null;
+const PALE_LADDER = [0, .15, .3, .5, .7];
+const chapterPale = () => { const c = CHAPTERS[chIdx]; return c && typeof c.pale === 'number' ? c.pale : PALE_LADDER[clamp(chIdx, 0, 4)]; };
+// beat/scene field normalisers: string or object forms -> one object shape the renderer reads
+function normRival(r, dp) {
+  if (!r) return null;
+  const q = typeof r === 'string' ? { mood: r } : Object.assign({}, r);
+  q.mood = q.mood || 'shadow';
+  q.pale = clamp(+(q.pale != null ? q.pale : (q.mood === 'unmasked' ? 1 : (dp != null ? dp : chapterPale()))) || 0, 0, 1);
+  if (q.notebook == null) q.notebook = q.pale > 0;
+  if (q.ribbon == null) q.ribbon = q.pale > 0;
+  return q;
+}
+function normEgg(e) {
+  if (!e) return null;
+  const o = typeof e === 'string' ? { level: 2, ticks: 0, backward: true } : e;
+  const ticks = clamp(Math.round(+o.ticks || 0), 0, 6), lit = Math.min(5, ticks), r = { mode: 'cracked', level: clamp(Math.round(+o.level || 2), 1, 5), ticks, gold: !!o.gold, backward: !!o.backward, pulse: true, x: o.x ?? 80, y: o.y ?? 26, s: o.s || 2, shake: o.shake || 0 };
+  if (lit > lastLit && !r.gold) { r.up = { i: lit - 1, t0: performance.now() }; A.tickUp(); }
+  lastLit = lit; return r;
+}
+function normPip(b) {
+  let p = b.pip; if (p === undefined) p = !!b.note || String(b.speaker || '').toUpperCase() === 'PIP';
+  if (!p) return null;
+  const o = typeof p === 'object' ? p : {}, full = !!(o.full || o.grow || o.s > 1);
+  return { s: o.s || (full ? 2 : 1), x: o.x ?? (full ? 64 : 68), y: o.y ?? (full ? 62 : 98), tied: !!o.tied, grow: !!o.grow, t0: performance.now(), grown: false };
+}
+const mkShard = (a, id, k) => (a && a.length >= 2 && !(run.found && run.found[id])) ? { x: +a[0], y: +a[1], id, k: a[2] != null ? a[2] : k, active: false, done: false } : null;
 
 function drawEggScene(t) {
   const e = view.egg;
-  if (e.mode === 'cracked') { drawEgg(80, 26, 2, 0, 1, t); return; }
+  if (e.mode === 'cracked') { drawEgg(e.x, e.y, e.s, e.shake, 1, t, e); return; }
   const p = (t - e.t0) / 3300;
-  if (p < .7) { const q = p / .7; drawEgg(80, 34, 2, Math.round(q * q * 4), q, t); return; }
-  if (!e.popped) { e.popped = true; particleBurst(80, 64, 60, CONF); flash(); A.hatch(); view.bg = 'festival'; view.glitch = 0; }
+  if (p < .7) { const q = p / .7; drawEgg(80, 34, 2, Math.round(q * q * 4), q, t, { ticks: 5, pulse: true }); return; }
+  if (!e.popped) { e.popped = true; particleBurst(80, 64, 60, CONF); flash(); A.hatch(); vib([40, 60, 40, 60, 160]); view.bg = 'festival'; view.glitch = 0; }
   const hop = Math.max(0, 1 - (p - .7) * 3) * Math.abs(Math.sin((p - .7) * 20)) * 14;
   R(56, 100, 18, 6, '#fff1c9'); R(94, 100, 18, 6, '#fff1c9');
   const h = view.hero; drawDuck(48, 44 - hop, 4, { acc: h.acc, tint: h.tint, t, still: hop > 0 });
+}
+function drawPipView(t) {
+  const p = view.pip; let s = p.s, x = p.x, y = p.y;
+  if (p.grow) { if (t - p.t0 < 900 && !RM) s = 1; else if (!p.grown) { p.grown = true; particleBurst(p.x + 16, p.y + 12, 30, ['#fff', '#59a0ff', '#ffe45c']); } }
+  if (s < p.s) { x = p.x + 8; y = p.y + 16 + (p.s - 1) * 16 - 16; }
+  if (!RM) { const k = clamp((t - p.t0) / 550, 0, 1); x = -24 + (x + 24) * (1 - Math.pow(1 - k, 3)); } // slides in from off-screen
+  drawPip(x, y, s, { tied: p.tied, t });
+}
+function drawShard(t) {
+  const sh = view.shard; if (!sh || !sh.active || sh.done) return;
+  const p = RM ? .6 : (Math.sin(t / 650 + 1) + 1) / 2, n = p > .78 ? 3 : p > .4 ? 2 : 1;
+  g.globalAlpha = .42 + .58 * p;
+  R(sh.x - n, sh.y, 2 * n + 1, 1, '#d8f6ff'); R(sh.x, sh.y - n, 1, 2 * n + 1, '#d8f6ff');
+  R(sh.x - 1, sh.y - 1, 3, 3, '#9fe8ff'); R(sh.x, sh.y, 1, 1, '#fff');
+  if (p > .6) { R(sh.x + 3, sh.y - 3, 1, 1, '#ffe45c'); R(sh.x - 4, sh.y + 2, 1, 1, '#ff9fe0'); }
+  g.globalAlpha = 1;
 }
 function drawDuo(t) {
   const d = view.duo, bob = Math.round(Math.sin(t / 300));
@@ -478,11 +2458,18 @@ function render(t) {
   g = ctx; ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.imageSmoothingEnabled = false;
   const sh = RM ? 0 : view.shake; if (sh) ctx.translate(Math.round((Math.random() - .5) * sh), Math.round((Math.random() - .5) * sh));
   (BG[view.bg] || BG.void)(t);
+  if (view.prop && PROP[view.prop]) PROP[view.prop](t, view.state);
   if (view.rival) drawRival(view.rival, t);
-  if (view.duck) { const d = view.duck; drawDuck(d.x, d.y, d.s, { acc: d.acc, tint: d.tint, wobble: d.wobble, flip: d.flip, t }); }
+  if (view.duck) {
+    const d = view.duck; let dx = 0, hop = 0, q = 0;
+    if (d.act) { q = clamp((t - d.act.t0) / 450, 0, 1); dx = (d.act.p === 'E' ? 22 : d.act.p === 'I' ? -12 : 6) * q; hop = Math.abs(Math.sin(q * Math.PI * 2)) * 5; }
+    drawDuck(d.x + dx, d.y - hop, d.s, { acc: d.acc, tint: d.tint, wobble: d.wobble && !d.act, flip: d.flip, t });
+    if (d.act && q > .3) emote(d.act.p, d.x + dx + 8, d.y - 22 + Math.round(Math.sin(t / 250)));
+  }
   if (view.duo) drawDuo(t);
-  if (view.pip) drawDuck(68, 98, 1, { tint: '#ffffff', bow: '#59a0ff', t });
+  if (view.pip) drawPipView(t);
   if (view.egg) drawEggScene(t);
+  drawShard(t);
   drawParticles(t);
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   glitchFx();
@@ -519,6 +2506,7 @@ const GLYPH = {
   R: ['110', '101', '110', '101', '101'], O: ['111', '101', '101', '101', '111'], U: ['101', '101', '101', '101', '111'],
   N: ['111', '101', '101', '101', '101'], D: ['110', '101', '101', '101', '110'], 1: ['010', '110', '010', '010', '111']
 };
+Object.assign(GLYPH, { 0: ['111', '101', '101', '101', '111'], 2: ['111', '001', '111', '100', '111'], 3: ['111', '001', '111', '001', '111'], 4: ['101', '101', '111', '001', '001'], 5: ['111', '100', '111', '001', '111'], 6: ['111', '100', '111', '101', '111'], 7: ['111', '001', '001', '010', '010'], 8: ['111', '101', '111', '101', '111'], 9: ['111', '101', '111', '001', '111'], '-': ['000', '000', '111', '000', '000'], '?': ['111', '001', '011', '000', '010'] });
 const BIGM = ['10001', '11011', '10101', '10001', '10001'];
 const HEART = ['0110110', '1111111', '1111111', '0111110', '0011100', '0001000'];
 function word(str, x, y, s, c) { [...str].forEach((ch, i) => bmp(GLYPH[ch], x + i * (3 * s + s), y, s, c)); }
@@ -541,13 +2529,13 @@ const ICON = [
     R(72, 35, 16, 6, '#b92b24'); R(74, 35, 12, 3, '#8fb7e8');
     disc(80, 54, 9, '#fff'); bmp(BIGM, 75, 49, 2, '#e8483c');
     [[60, 78], [100, 76]].forEach(([x, y]) => { R(x, y, 3, 2, '#fff'); R(x + 2, y - 5, 1, 6, '#fff'); R(x + 2, y - 5, 3, 1, '#fff'); });
-    star(100, 30, '#ffe45c'); star(58, 30, '#fff');
+    star(100, 30, '#ffe45c'); star(58, 30, '#fff'); if (typeof fN_badgeDuck === 'function') fN_badgeDuck(51, 54);
   },
   () => { // boba: two cups, one heart
     R(40, 20, 80, 70, '#ffc4dd'); for (let x = 40; x < 120; x += 12) R(x, 20, 6, 70, '#ffb3d3');
     cup(66, '#d9a066', '#ff6fb5', .3); cup(94, '#c9a7ff', '#59e0ff', -.3);
     bmp(HEART, 76, 28, 1, '#ff4f87'); bmp(HEART, 77, 29, 1, '#ff4f87');
-    star(52, 34, '#fff'); star(108, 38, '#fff'); R(56, 80, 3, 3, '#3a2418'); R(100, 82, 3, 3, '#3a2418');
+    star(52, 34, '#fff'); star(108, 38, '#fff'); R(56, 80, 3, 3, '#3a2418'); R(100, 82, 3, 3, '#3a2418'); if (typeof fN_badgeDuck === 'function') fN_badgeDuck(72, 58);
   },
   () => { // arcade: ROUND1 + joystick + a chef'd chicken
     R(40, 20, 80, 70, '#17103a');
@@ -557,7 +2545,7 @@ const ICON = [
     disc(98, 34, 5, '#d9822b'); disc(97, 33, 2, '#f0a24a'); R(101, 38, 2, 5, '#fff7e0'); R(100, 43, 2, 2, '#fff7e0'); R(103, 43, 2, 2, '#fff7e0');
     R(54, 58, 52, 17, '#9a1e19'); R(55, 58, 50, 15, '#e8483c'); R(55, 58, 50, 2, '#ff8a7a');
     word('ROUND1', 57, 63, 2, '#9a1e19'); word('ROUND1', 56, 62, 2, '#fff');
-    star(46, 60, '#ffe45c'); star(114, 58, '#ffe45c'); R(70, 80, 4, 4, '#ffd23f'); R(80, 80, 4, 4, '#ffd23f'); R(90, 80, 4, 4, '#ffd23f');
+    star(46, 60, '#ffe45c'); star(114, 58, '#ffe45c'); R(70, 80, 4, 4, '#ffd23f'); R(80, 80, 4, 4, '#ffd23f'); R(90, 80, 4, 4, '#ffd23f'); if (typeof fN_badgeDuck === 'function') fN_badgeDuck(76, 34);
   },
   () => { // kitchen: chocolate protein muffin + dumbbell
     R(40, 20, 80, 70, '#fff0d4'); for (let x = 40; x < 120; x += 10) R(x, 20, 1, 70, '#ecd9b0'); for (let y = 20; y < 90; y += 10) R(40, y, 80, 1, '#ecd9b0');
@@ -570,7 +2558,7 @@ const ICON = [
     [[66, 47], [74, 46], [80, 49], [60, 53]].forEach(([x, y]) => R(x, y, 2, 2, '#a8693a'));
     [[62, 30], [70, 26], [78, 30]].forEach(([x, y]) => { R(x, y, 3, 8, 'rgba(255,255,255,.7)'); R(x + 1, y - 3, 3, 3, 'rgba(255,255,255,.5)'); });
     R(88, 70, 15, 2, '#555'); R(86, 66, 3, 10, '#333'); R(102, 66, 3, 10, '#333'); R(84, 68, 2, 6, '#777'); R(105, 68, 2, 6, '#777');
-    star(100, 36, '#ffe45c'); star(54, 36, '#ffb3d3');
+    star(100, 36, '#ffe45c'); star(54, 36, '#ffb3d3'); if (typeof fN_badgeDuck === 'function') fN_badgeDuck(92, 48);
   },
   () => { // trail: icy mountain, a slipping duck
     R(40, 20, 80, 22, '#5a6fc2'); R(40, 42, 80, 30, '#8aa4e6');
@@ -579,7 +2567,7 @@ const ICON = [
     [[48, 76], [51, 78], [49, 80], [56, 84], [59, 86], [57, 88]].forEach(([x, y]) => R(x, y, 3, 1, '#5aa0d0'));
     [[48, 62], [110, 66]].forEach(([x, y]) => { R(x - 1, y + 10, 3, 6, '#5b3a1a'); tri(x, y - 6, 18, '#2f6b4f', 1.1); tri(x, y - 2, 8, '#fff', 1.1); });
     drawDuck(72, 56, 2, { still: true, rot: -.3, t: 0 });
-    [[50, 34], [78, 30], [112, 46], [60, 52], [96, 56]].forEach(([x, y]) => { R(x, y, 1, 3, '#fff'); R(x - 1, y + 1, 3, 1, '#fff'); });
+    [[50, 34], [78, 30], [112, 46], [60, 52], [96, 56]].forEach(([x, y]) => { R(x, y, 1, 3, '#fff'); R(x - 1, y + 1, 3, 1, '#fff'); }); if (typeof fN_badgeDuck === 'function') fN_badgeDuck(90, 58);
   }
 ];
 function drawBadge(gx, i) {
@@ -639,6 +2627,8 @@ const A = {
   heart() { this.t(60, .12, 'sine', .3); this.t(55, .12, 'sine', .25, .16); },
   hatch() { [523, 659, 784, 1047, 1319].forEach((f, i) => this.t(f, .14, 'square', .09, i * .08)); },
   win() { [659, 784, 988, 1319].forEach((f, i) => this.t(f, .16, 'triangle', .12, i * .1)); },
+  chime() { [988, 1319, 1760, 2349].forEach((f, i) => this.t(f, .35, 'sine', .09, i * .07)); },
+  tickUp() { this.t(440, .12, 'triangle', .08); this.t(660, .25, 'sine', .08, .1); },
   loop() {
     const bass = [110, 110, 130.8, 98, 110, 110, 146.8, 130.8]; let i = 0;
     const step = () => {
@@ -671,37 +2661,168 @@ function hud(chip) { $('#chip').textContent = chip; const s = stability(); const
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0;[a[i], a[j]] = [a[j], a[i]]; } return a; };
 function duckFromType(type) { return { acc: type.split(''), tint: TINT[temperament(type)] }; }
 
+/* ---------- time shards (tappable sparkles) ---------- */
+let toastTimer = null;
+function showShardHud(on) { $('#shardc').classList.toggle('on', !!on); }
+function updateShardHud(bump) {
+  const e = $('#shardc'); e.textContent = '★ ' + (run ? run.shards : 0) + '/5';
+  if (bump) { e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); }
+}
+function toast(msg) {
+  const t = $('#toast'); t.textContent = '★ ' + msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 4600);
+}
+function collectShard(sh) {
+  if (!sh || sh.done || !run) return;
+  sh.done = true; run.found[sh.id] = 1; run.shards++;
+  particleBurst(sh.x, sh.y, 28, ['#fff', '#9fe8ff', '#ffe45c', '#ff9fe0']);
+  A.init(); A.chime(); vib([25, 45, 35]);
+  const echoes = FIN && Array.isArray(FIN.shardEchoes) ? FIN.shardEchoes : [];
+  toast(echoes[clamp(sh.k | 0, 0, 4)] || echoes[run.shards - 1] || 'A time shard! The goose saved this echo.');
+  showShardHud(true); updateShardHud(true);
+}
+cv.addEventListener('pointerdown', e => {
+  const sh = view.shard; if (!sh || !sh.active || sh.done || busy || view.mode === 'photo') return;
+  const r = cv.getBoundingClientRect(); if (!r.width) return;
+  const lx = (e.clientX - r.left) / r.width * 160, ly = (e.clientY - r.top) / r.height * 120;
+  if (Math.hypot(lx - sh.x, ly - sh.y) <= (e.pointerType === 'mouse' ? 11 : 16)) collectShard(sh);
+});
+
+/* ---------- share card (1080x1350 pixel-art png) ---------- */
+let cardCache = null;
+function drawCard(type) {
+  const c = document.createElement('canvas'); c.width = 1080; c.height = 1350;
+  const x = c.getContext('2d'), d = DUCKS[type] || ['Duck', ''], h = duckFromType(type), sp = spectrum(run), keep = g;
+  g = x;
+  try {
+    x.setTransform(9, 0, 0, 9, 0, 0); x.imageSmoothingEnabled = false;
+    const bands = ['#120d26', '#161030', '#1a1238', '#1e1642', '#22194c', '#271d56', '#2b2160'];
+    for (let i = 0; i < 150; i++) R(0, i, 120, 1, bands[Math.min(6, i / 22 | 0)]);
+    for (let i = 0; i < 70; i++) { const px = rnd(i + 3) * 118 | 0, py = 22 + rnd(i + 90) * 78 | 0; R(px, py, 1, 1, i % 4 ? '#ffffff' : '#59e0ff'); if (i % 9 === 0) star(px, py, '#ffe45c'); }
+    for (let i = 0; i < 34; i++) R(rnd(i + 200) * 118 | 0, rnd(i + 300) * 94 | 0, 1, 1, CONF[i % 5]);
+    disc(60, 62, 40, '#2a1f63'); disc(60, 62, 35, '#33267a'); disc(60, 62, 30, '#3d2f8f');
+    R(30, 94, 60, 2, '#3d2f8f'); R(36, 96, 48, 1, '#2a1f63');
+    drawDuck(28, 30, 4, { acc: h.acc, tint: h.tint, still: true, t: 0 });
+    [[16, 40], [102, 44], [20, 78], [100, 82], [10, 60], [110, 64]].forEach(([sx, sy]) => star(sx, sy, '#ffe45c'));
+    R(0, 0, 120, 1, '#ffd23f'); R(0, 149, 120, 1, '#ffd23f'); R(0, 0, 1, 150, '#ffd23f'); R(119, 0, 1, 150, '#ffd23f');
+    R(1, 1, 118, 1, '#7a2bff'); R(1, 148, 118, 1, '#7a2bff'); R(1, 1, 1, 148, '#7a2bff'); R(118, 1, 1, 148, '#7a2bff');
+    x.setTransform(1, 0, 0, 1, 0, 0);
+    x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+    const FP = "'Press Start 2P', 'Pixelify Sans', monospace", FS = "'Pixelify Sans', ui-monospace, monospace";
+    const say = (s, px, py, size, col, sh, font) => { x.font = size + 'px ' + (font || FP); if (sh) { x.fillStyle = sh; x.fillText(s, px + 4, py + 4); } x.fillStyle = col; x.fillText(s, px, py); };
+    say('DUCK QUEST', 540, 100, 72, '#ffd23f', '#7a2bff');
+    say('THE TIMELINE GLITCH', 540, 142, 26, '#59e0ff');
+    say(d[0].toUpperCase(), 540, 930, 46, '#ffd23f', '#7a2bff');
+    say(type, 540, 992, 50, '#ff6fb5', '#2a1f63');
+    sp.forEach((r, i) => {
+      const y0 = 1020 + i * 56, bx = 300, bw = 480;
+      x.textAlign = 'left'; say(r.a + ' ' + r.pa + '%', 100, y0 + 32, 26, '#b5a9e6');
+      x.textAlign = 'right'; say(r.pb + '% ' + r.b, 980, y0 + 32, 26, '#b5a9e6');
+      x.fillStyle = '#3a2f78'; x.fillRect(bx - 6, y0 + 2, bw + 12, 40); x.fillStyle = '#ff6fb5'; x.fillRect(bx, y0 + 8, bw, 28); x.fillStyle = '#59e0ff'; x.fillRect(bx, y0 + 8, Math.round(bw * r.pa / 100), 28);
+      x.textAlign = 'center';
+    });
+    x.textAlign = 'center';
+    say('It takes two to keep a memory.', 540, 1312, 38, '#fff7e0', '#2a1f63', FS);
+  } finally { g = keep; }
+  return c;
+}
+function cardBlob(type) {
+  if (cardCache && cardCache.type === type) return cardCache.p;
+  const p = new Promise((res, rej) => {
+    const fl = document.fonts && document.fonts.load ? Promise.race([Promise.all([document.fonts.load("20px 'Press Start 2P'"), document.fonts.load("20px 'Pixelify Sans'")]), new Promise(r => setTimeout(r, 900))]) : Promise.resolve();
+    fl.catch(() => { }).then(() => { try { drawCard(type).toBlob(b => b ? res(b) : rej(new Error('blob')), 'image/png'); } catch (e) { rej(e); } });
+  });
+  cardCache = { type, p }; p.catch(() => { cardCache = null; }); return p;
+}
+const shareMsg = () => (FIN && FIN.shareText) || 'Find out which duck you are in Duck Quest!';
+async function saveCard(b) {
+  const label = b.textContent;
+  try {
+    const type = resultType(run), blob = await cardBlob(type), file = new File([blob], 'duck-card-' + type + '.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try { await navigator.share({ files: [file], title: 'Duck Quest', text: shareMsg() }); b.textContent = 'Card shared!'; return; }
+      catch (e) { if (e && e.name === 'AbortError') return; } // share refused: fall through to a download
+    }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000); b.textContent = 'Card saved!';
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+    b.textContent = "Couldn't save. Try a screenshot!"; setTimeout(() => { b.textContent = label; }, 2500);
+  }
+}
+
 /* ---------- flow ---------- */
+let hatchTimer = null;
+const SPK_COL = { PIP: '#8fd0ff', GOOSE: '#a99fd6', GLITCH: '#ff4fd8', NARRATOR: '#8d83bd' }, SPK_EXTRA = ['#ffd23f', '#7dffb0', '#ffb27a', '#c9a7ff'];
+function spkInfo(n) { if (SPK_COL[n]) return { c: SPK_COL[n], dim: n === 'NARRATOR' }; let h = 0; for (const ch of n) h = (h * 31 + ch.charCodeAt(0)) | 0; return { c: SPK_EXTRA[Math.abs(h) % SPK_EXTRA.length], dim: false }; }
+const chapterChip = () => 'CH ' + (chIdx + 1) + ' / 5 · ' + CHAPTERS[chIdx].name.toUpperCase();
+const chapterCtx = tag => ({ tag, chapter: true, bg: CHAPTERS[chIdx].bg, glitch0: .3 });
+
 function startGame() {
-  run = newRun(); chIdx = 0; PART.length = 0; A.tense = false; $('#timer').style.display = 'none';
-  setView({ bg: 'void', duck: { x: 22, y: 62, s: 2, acc: [], tint: '#ffd23f' }, egg: { mode: 'cracked' }, glitch: .3 });
+  clearTimeout(hatchTimer); clearTimeout(toastTimer); $('#toast').classList.remove('on');
+  run = newRun(); chIdx = 0; lastLit = 0; cardCache = null; PART.length = 0; A.tense = false; $('#timer').style.display = 'none';
+  showShardHud(false); updateShardHud();
+  setView({ bg: 'void', duck: { x: 22, y: 62, s: 2, acc: [], tint: '#ffd23f' }, egg: normEgg({ level: 1, ticks: 0, backward: true }), glitch: .3 });
   hud('DUCK QUEST');
   const t = txt('h1', 'title', 'DUCK QUEST'), s = txt('div', 'sub', 'THE TIMELINE GLITCH'), cap = el('p', 'cap'), box = el('div');
   setPanel(t, s, cap, box);
-  typeInto(cap, "The Chrono Egg is cracking and time is scattering. You're the duck they sent to fix it. Every choice you make shapes who you are.", () => box.append(btn('Begin the mission', () => transition(() => startChapter(0)))));
+  typeInto(cap, (FIN && FIN.introText) || "The Chrono Egg is cracking and time is scattering. You're the duck they sent to fix it. Every choice you make shapes who you are.", () => box.append(btn('Begin the mission', () => transition(() => startPrologue()))));
 }
-function startChapter(i) { chIdx = i; queue = chapterQueue(run, CHAPTERS[i]); qi = 0; nextScene(); }
+function startPrologue(from) { runBeats(FIN && FIN.prologue, { tag: 'prologue', bg: 'void', hud: 'DUCK QUEST', glitch0: .3 }, () => startChapter(0), from); }
+function startChapter(i, from) {
+  chIdx = i; queue = chapterQueue(run, CHAPTERS[i]); qi = 0; showShardHud(true); updateShardHud();
+  runBeats(CHAPTERS[i].intro, chapterCtx('intro' + (i + 1)), nextScene, from);
+}
 function nextScene() { if (qi >= queue.length) return endChapter(); showScene(queue[qi++]); }
-function endChapter() { showBeat(CHAPTERS[chIdx].after, () => { if (chIdx < CHAPTERS.length - 1) startChapter(chIdx + 1); else showTwist(); }); }
+function endChapter(from) { runBeats(CHAPTERS[chIdx].after, chapterCtx('after' + (chIdx + 1)), () => { if (chIdx < CHAPTERS.length - 1) startChapter(chIdx + 1); else startReveal(); }, from); }
+function startReveal(from) { runBeats(FIN && FIN.revealBeats, { tag: 'reveal', bg: 'void', glitch0: .3 }, showTwist, from); }
+function startUnlock(from) { runBeats(FIN && FIN.unlockBeats, { tag: 'unlock', bg: 'void', hud: 'THE LAST SEAL', glitch0: 0 }, startPhotos, from); }
+function startCouple(from) { runBeats(FIN && FIN.coupleBeats, { tag: 'couple', bg: 'void', hud: 'THE TIMELINE IS HEALED', glitch0: 0 }, showCouple, from); }
 
-function showBeat(b, done) {
-  const ch = CHAPTERS[chIdx];
-  setView({ bg: b.bg, duck: duckView(), rival: b.rival ? { mood: b.rival } : null, pip: !!b.note, egg: b.egg ? { mode: b.egg } : null, glitch: b.glitch || .3 });
-  view.duck.wobble = false;
-  hud('CH ' + (chIdx + 1) + ' / 5 · ' + ch.name.toUpperCase());
-  const cap = el('p', 'cap'), box = el('div'); setPanel(cap, box);
-  typeInto(cap, b.text, () => {
+// Plays a list of beats (array, single object or nothing). Each Continue runs a transition into the next beat; the last one calls done().
+function runBeats(list, o, done, from) {
+  const L = asList(list); o = o || {};
+  let i = clamp(from | 0, 0, Math.max(0, L.length)), prevBg = null;
+  for (let k = 0; k < i && k < L.length; k++) if (L[k].bg) prevBg = L[k].bg;
+  const next = () => {
+    if (i >= L.length) { if (done) done(); return; }
+    const b = L[i], idx = i++, bg = b.bg || prevBg || o.bg || 'void'; prevBg = bg;
+    showBeat(b, Object.assign({}, o, { bg, idx }), () => transition(next));
+  };
+  next();
+}
+function showBeat(b, o, cont) {
+  const hero = run.hatched ? duckFromType(resultType(run)) : null, dv = duckView(); dv.wobble = false;
+  if (hero) { dv.tint = hero.tint; dv.acc = hero.acc; }
+  if (b.duckTint) dv.tint = b.duckTint;
+  setView({
+    bg: o.bg || 'void', duck: b.hideDuck ? null : dv, rival: normRival(b.rival), pip: normPip(b), egg: normEgg(b.egg),
+    glitch: clamp(b.glitch != null ? +b.glitch : (o.glitch0 != null ? o.glitch0 : .3), 0, 1), shake: clamp(+b.shake || 0, 0, 6), prop: b.prop || null,
+    shard: mkShard(b.shard, (o.tag || 'beat') + ':' + o.idx, o.chapter ? chIdx : Math.min(4, run.shards))
+  });
+  const mv = view;
+  if (b.flash && !RM) flash();
+  hud(o.hud || chapterChip());
+  const sp = String(b.speaker || 'NARRATOR').toUpperCase(), info = spkInfo(sp);
+  const tag = txt('div', 'spk' + (info.dim ? ' dim' : ''), sp); tag.style.setProperty('--sp', info.c);
+  const cap = el('p', 'cap say' + (sp === 'NARRATOR' ? ' nar' : '') + (sp === 'GLITCH' ? ' gl' : '')); cap.style.setProperty('--sp', info.c);
+  const box = el('div'); setPanel(tag, cap, box);
+  typeInto(cap, b.text || '', () => {
+    if (mv.shard) mv.shard.active = true;
     if (b.note) { const n = el('div', 'note'); n.append(txt('b', '', 'NOTE FROM THE MAKER'), document.createTextNode(b.note)); box.append(n); }
-    box.append(btn('Continue', () => transition(done)));
+    const bt = btn(b.btn || 'Continue', () => cont()); box.append(bt);
+    if (!RM && bt.scrollIntoView) try { bt.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { }
   });
 }
 function showScene(s) {
   cur = s; const ch = CHAPTERS[chIdx];
-  setView({ bg: ch.bg, duck: duckView(), rival: s.rival ? { mood: s.rival } : null, glitch: glitchLevel() + (s.timed ? .2 : 0) });
-  hud('CH ' + (chIdx + 1) + ' / 5 · ' + ch.name.toUpperCase());
+  setView({ bg: ch.bg, duck: duckView(), rival: normRival(s.rival), glitch: glitchLevel() + (s.timed ? .2 : 0), prop: s.id, shard: mkShard(s.shard, s.id, chIdx) });
+  const mv = view;
+  hud(chapterChip());
   A.tense = !!s.timed;
   const cap = el('p', 'cap'), opts = el('div'); setPanel(cap, opts);
   typeInto(cap, s.text, () => {
+    if (mv.shard) mv.shard.active = true;
     const list = shuffle(s.opts.slice());
     list.forEach((op, i) => opts.append(btn(op.t, b => choose(s, op, b, false), 'opt', i)));
     if (s.timed) startTimer(s);
@@ -711,73 +2832,117 @@ let tmr = null, hb = null;
 function startTimer(s) {
   const bar = $('#timer'); bar.style.display = 'block'; bar.style.transition = 'none'; bar.style.width = '100%'; void bar.offsetWidth;
   bar.style.transition = 'width 10s linear'; bar.style.width = '0%';
-  hb = setInterval(() => A.heart(), 900);
+  hb = setInterval(() => { A.heart(); vib([14, 70, 14]); }, 900);
   tmr = setTimeout(() => { const op = s.opts.find(x => x.d); const b = [...panel.querySelectorAll('.opt')].find(x => x.textContent.includes(op.t)); choose(s, op, b, true); }, 10000);
 }
 function stopTimer() { clearTimeout(tmr); clearInterval(hb); $('#timer').style.display = 'none'; A.tense = false; }
 function choose(s, op, b, auto) {
   if (busy) return; busy = true; stopTimer(); A.pick();
   panel.querySelectorAll('.opt').forEach(x => x.classList.add(x === b ? 'chosen' : 'off'));
-  if (auto) { view.shake = 4; flash(); A.err(); }
+  if (auto) { view.shake = 4; flash(); A.err(); vib([70, 40, 140]); }
   const before = leaders(run).join(''); record(run, s, op);
   setTimeout(() => {
     view.shake = 0; view.duck.acc = leaders(run); hud($('#chip').textContent);
     if (leaders(run).join('') !== before) particleBurst(view.duck.x * 1 + 16, view.duck.y + 6, 16, ['#ffe45c', '#fff', '#ff6fb5']);
   }, 150);
-  setTimeout(() => { busy = false; transition(nextScene); }, 650);
+  setTimeout(() => showOutcome(s, op, auto), 550);
+}
+// After a choice the scene art changes to show what happened, with a one-line result.
+function showOutcome(s, op, auto) {
+  busy = false; view.state = op.p; view.duck.act = { p: op.p, t0: performance.now() }; A.pick();
+  const cap = el('p', 'cap'), box = el('div'), said = txt('p', 'big', '▶ ' + op.t); said.style.margin = '0 0 6px';
+  setPanel(said, cap, box);
+  typeInto(cap, (auto ? "No time to think! " : "") + OUT[s.id][op.p], () => box.append(btn('Next', () => transition(nextScene))));
+}
+// typed paragraphs one after another (tap a line to finish it)
+function typeSeq(items, done) {
+  let k = 0;
+  const next = () => { if (k >= items.length) { done && done(); return; } const it = items[k++]; it.node.hidden = false; try { it.node.scrollIntoView({ block: 'nearest' }); } catch (e) { } typeInto(it.node, it.text, next); };
+  next();
 }
 
 function showTwist() {
-  const lead = leaders(run), me = duckFromType(resultType(run));
-  setView({ bg: 'void', duck: { x: 26, y: 60, s: 2, acc: lead, tint: '#ffd23f' }, rival: { mood: 'unmasked', x: 100, y: 60 }, glitch: .5 });
+  const lead = leaders(run), me = duckFromType(resultType(run)), hasReflect = !!(finFn('gooseReflect') || finFn('shardLine'));
+  setView({ bg: 'void', duck: { x: 26, y: 60, s: 2, acc: lead, tint: '#ffd23f' }, rival: normRival({ mood: 'unmasked', x: 100, y: 60 }), glitch: .5 });
   hud('THE TWIST');
   const sp = spectrum(run), wrap = el('div');
-  wrap.append(txt('h1', 'title', 'THE TWIST'), txt('div', 'sub', 'YOU AND THE GOOSE WERE ONE PROBLEM'));
-  wrap.append(txt('p', 'big', "The Glitch fed on both of you. Your choices cracked the timeline AND healed it:"));
+  wrap.append(txt('h1', 'title', (FIN && FIN.twistTitle) || 'THE TWIST'), txt('div', 'sub', (FIN && FIN.twistSub) || 'YOU AND THE GOOSE WERE ONE PROBLEM'));
+  wrap.append(txt('p', 'big', (FIN && FIN.twistIntro) || "The Glitch fed on both of you. Your choices cracked the timeline AND healed it:"));
   sp.forEach(x => {
+    const tw = TWIST[x.lead] || ['', ''];
     const c = el('div', 'card'); c.append(txt('h4', '', x.lead + ' · ' + POLE_NAME[x.lead].toUpperCase()));
-    const a = el('div'); a.innerHTML = '<span class="bk">CRACKED:</span> '; a.append(document.createTextNode(TWIST[x.lead][0]));
-    const b = el('div'); b.innerHTML = '<span class="hl">MENDED:</span> '; b.append(document.createTextNode(TWIST[x.lead][1]));
+    const a = el('div'); a.innerHTML = '<span class="bk">CRACKED:</span> '; a.append(document.createTextNode(tw[0]));
+    const b = el('div'); b.innerHTML = '<span class="hl">MENDED:</span> '; b.append(document.createTextNode(tw[1]));
     c.append(a, b); wrap.append(c);
   });
-  wrap.append(btn('Seal the timeline', () => transition(showHatch)));
+  wrap.append(btn(hasReflect ? 'Continue' : 'Seal the timeline', () => transition(hasReflect ? showReflect : showHatch)));
   setPanel(wrap);
   const t0 = performance.now(); const d = setInterval(() => { const p = clamp((performance.now() - t0) / 2500, 0, 1); if (view.rival && view.rival.mood === 'unmasked') view.glitch = .5 * (1 - p); const u = $('#stab u'); u.style.width = (stability() + (100 - stability()) * p) + '%'; if (p >= 1) clearInterval(d); }, 60);
   me.acc = lead;
 }
+// the goose reflects on the player's actual choices (FIN.gooseReflect) and the shards found (FIN.shardLine)
+function showReflect() {
+  const lead = leaders(run), type = resultType(run);
+  setView({ bg: 'void', duck: { x: 26, y: 60, s: 2, acc: lead, tint: '#ffd23f' }, rival: normRival({ mood: 'unmasked', x: 100, y: 60 }), glitch: .12 });
+  hud('THE GOOSE');
+  let lines = [], sl = '';
+  try { const f = finFn('gooseReflect'); if (f) { const r = f(run, { type, lead, counts: run.counts, shards: run.shards, history: run.history }); lines = (Array.isArray(r) ? r : r ? [r] : []).filter(Boolean).map(String); } } catch (e) { }
+  try { const f = finFn('shardLine'); if (f) sl = String(f(run.shards) || ''); } catch (e) { }
+  if (!lines.length && !sl) { showHatch(); return; }
+  const info = spkInfo('GOOSE'), tag = txt('div', 'spk', 'GOOSE'), w = el('div'), items = [];
+  tag.style.setProperty('--sp', info.c);
+  lines.forEach(l => { const n = el('p', 'cap say'); n.style.setProperty('--sp', info.c); n.style.minHeight = '0'; n.hidden = true; w.append(n); items.push({ node: n, text: l }); });
+  if (sl) {
+    const k = txt('div', 'shardrow', '★ ECHOES FOUND ' + run.shards + ' / 5'); k.hidden = true; w.append(k);
+    const n = el('p', 'cap say'); n.style.setProperty('--sp', info.c); n.style.minHeight = '0'; n.hidden = true; w.append(n);
+    items.push({ node: k, text: '★ ECHOES FOUND ' + run.shards + ' / 5' }, { node: n, text: sl });
+  }
+  const box = el('div'); setPanel(tag, w, box);
+  typeSeq(items, () => { const bt = btn('Seal the timeline', () => transition(showHatch)); box.append(bt); try { bt.scrollIntoView({ block: 'nearest' }); } catch (e) { } });
+}
 function showHatch() {
-  const type = resultType(run), hero = duckFromType(type);
+  const type = resultType(run), hero = duckFromType(type); run.hatched = true; clearTimeout(hatchTimer);
   setView({ bg: 'void', egg: { mode: 'hatch', t0: performance.now() }, hero, glitch: 0 });
   hud('THE CHRONO EGG'); $('#stab u').style.width = '100%';
-  setPanel(txt('p', 'cap', "The Chrono Egg trembles... something is hatching..."));
-  setTimeout(showResult, 3700);
+  const ht = FIN && FIN.hatchText;
+  if (ht) { // custom text: tap to continue once the egg has hatched
+    const box = el('div'); setPanel(txt('p', 'cap say nar', ht), box);
+    hatchTimer = setTimeout(() => box.append(btn('Meet your duck', showResult)), 3700);
+  } else {
+    setPanel(txt('p', 'cap', "The Chrono Egg trembles... something is hatching..."));
+    hatchTimer = setTimeout(showResult, 3700);
+  }
 }
 function showResult() {
+  clearTimeout(hatchTimer); run.hatched = true;
   const type = resultType(run), d = DUCKS[type], w = el('div');
   hud('RESULT');
   w.append(txt('div', 'kicker', 'YOU ARE'), txt('h2', 'duckname', d[0]), txt('div', 'typeline', type + ' · ' + [...type].map(l => POLE_NAME[l]).join(' · ')), txt('p', 'blurb', d[1]));
+  try { const f = finFn('resultNote'), rn = f && f(type); if (rn) w.append(txt('p', 'blurb rn', String(rn))); } catch (e) { }
   spectrum(run).forEach(x => {
     const r = el('div', 'spec'); r.append(txt('div', '', x.a + ' ' + x.pa + '%'));
     const tr = el('div', 'tr'); const i = el('i'); i.style.width = x.pa + '%'; tr.append(i); r.append(tr, txt('div', 'r', x.pb + '% ' + x.b)); w.append(r);
   });
   w.append(el('div')); w.lastChild.style.height = '8px';
-  w.append(btn('One more thing', showLock), btn('Play again', () => transition(startGame), 'opt ghost', 1));
+  w.append(btn('One more thing', showLock), btn('Save my duck card', saveCard, 'opt', 1), btn('Play again', () => transition(startGame), 'opt ghost', 2));
   setPanel(w);
+  setTimeout(() => { try { cardBlob(type).catch(() => { }); } catch (e) { } }, 500); // pre-render so Share works inside the tap
 }
 function showLock() {
-  setView({ bg: 'void', duck: { x: 26, y: 60, s: 2, acc: leaders(run), tint: duckFromType(resultType(run)).tint }, rival: { mood: 'unmasked', x: 100, y: 60 }, glitch: .25 });
+  setView({ bg: 'void', duck: { x: 26, y: 60, s: 2, acc: leaders(run), tint: duckFromType(resultType(run)).tint }, rival: normRival({ mood: 'unmasked', x: 100, y: 60 }), pip: FIN && FIN.lockLead ? normPip({ pip: { full: true } }) : null, glitch: .25 });
   hud('THE LAST SEAL');
-  const w = el('div'); w.append(txt('p', 'cap', CFG.lock.q));
+  const w = el('div'); if (FIN && FIN.lockLead) w.append(txt('p', 'lead', FIN.lockLead));
+  w.append(txt('p', 'cap', CFG.lock.q));
   const inp = el('input', 'ans'); inp.type = 'text'; inp.placeholder = 'Type the answer...'; inp.autocomplete = 'off'; inp.autocapitalize = 'none'; inp.spellcheck = false; inp.maxLength = 40;
   const msg = txt('p', 'big', '');
   const submit = () => {
     if (busy) return; A.init();
     const v = inp.value.trim().toLowerCase().replace(/[^a-z0-9 ]/g, '');
-    if (CFG.lock.answers.includes(v)) { A.win(); transition(startPhotos); }
+    if (CFG.lock.answers.includes(v)) { A.win(); transition(() => startUnlock()); }
     else { A.err(); inp.classList.remove('bad'); void inp.offsetWidth; inp.classList.add('bad'); msg.textContent = "The Glitch isn't convinced. Try again!"; }
   };
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-  w.append(inp, msg, btn('Unlock', submit), btn("I wasn't there. Skip", () => transition(showEnd), 'opt ghost', 1));
+  w.append(inp, msg, btn('Unlock', submit), btn((FIN && FIN.skipLabel) || "I wasn't there. Skip", () => transition(showEnd), 'opt ghost', 1));
   setPanel(w);
 }
 let pi = 0;
@@ -786,7 +2951,7 @@ function showPhoto() {
   const p = CFG.badges[pi], last = pi === CFG.badges.length - 1; setView({ mode: 'photo' }); photo = null; hud('ACHIEVEMENT ' + (pi + 1) + ' / ' + CFG.badges.length);
   const w = el('div'); w.append(txt('div', 'kicker', 'ACHIEVEMENT UNLOCKED · ' + p.label.toUpperCase()), txt('h2', 'duckname', p.title)); w.lastChild.style.fontSize = '13px';
   const cap = el('p', 'cap'); cap.style.minHeight = '2.6em'; w.append(cap); setPanel(w);
-  loadPhoto(pi, () => { A.win(); typeInto(cap, p.cap, () => w.append(btn(last ? 'Continue' : 'Next achievement', () => { if (!last) { pi++; showPhoto(); } else transition(showCouple); }))); });
+  loadPhoto(pi, () => { A.win(); typeInto(cap, p.cap, () => w.append(btn(last ? 'Continue' : 'Next achievement', () => { if (!last) { pi++; showPhoto(); } else transition(() => startCouple()); }))); });
 }
 function showCouple() {
   const type = resultType(run), mine = CFG.myType, a = duckFromType(type), b = duckFromType(mine);
@@ -804,15 +2969,15 @@ function showTicket() {
   w.append(txt('p', 'big', 'Screenshot this. It is valid.'), k, btn('Play again', () => transition(startGame), 'opt ghost'));
   setPanel(w);
 }
-function showEnd() {
-  const type = resultType(run), hero = duckFromType(type);
-  setView({ bg: 'festival', duck: { x: 48, y: 44, s: 4, acc: hero.acc, tint: hero.tint } }); hud('THE FESTIVAL'); particleBurst(80, 40, 40, CONF);
-  const w = el('div'); w.append(txt('h2', 'duckname', 'TIME IS FIXED!'), txt('p', 'blurb', "The festival begins and the " + DUCKS[type][0] + " is the guest of honor. Send this to a friend and see which duck they are."));
-  w.append(btn('Share this game', shareGame), btn('Play again', () => transition(startGame), 'opt ghost', 1));
+function showEnd() { // generic ending for anyone who skipped the memory lock
+  const type = resultType(run), hero = duckFromType(type), se = FIN && FIN.skipEnding && (FIN.skipEnding.title || FIN.skipEnding.text) ? FIN.skipEnding : null;
+  setView({ bg: 'festival', duck: { x: 48, y: 44, s: 4, acc: hero.acc, tint: hero.tint } }); hud(se ? 'THE TIMELINE IS SEALED' : 'THE FESTIVAL'); particleBurst(80, 40, 40, CONF);
+  const w = el('div'); w.append(txt('h2', 'duckname', se ? (se.title || '') : 'TIME IS FIXED!'), txt('p', 'blurb', se ? (se.text || '') : "The festival begins and the " + DUCKS[type][0] + " is the guest of honor. Send this to a friend and see which duck they are."));
+  w.append(btn('Share this game', shareGame), btn('Save my duck card', saveCard, 'opt', 1), btn('Play again', () => transition(startGame), 'opt ghost', 2));
   setPanel(w);
 }
 function shareGame(b) {
-  const url = location.href.split('?')[0].split('#')[0], text = 'Find out which duck you are in Duck Quest!';
+  const url = location.href.split('?')[0].split('#')[0], text = shareMsg();
   if (navigator.share) navigator.share({ title: 'Duck Quest', text, url }).catch(() => { });
   else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => { b.textContent = 'Link copied!'; }).catch(() => { });
 }
@@ -821,6 +2986,7 @@ function shareGame(b) {
 $('#mute').addEventListener('click', () => { A.init(); A.setMuted(!A.m); });
 try { if (localStorage.getItem('dq-mute') === '1') A.setMuted(true); } catch (e) { }
 document.addEventListener('pointerdown', () => A.init(), { once: true });
+// ---- debug previews: everything from here down to the boot line is removed by build.mjs --deploy (keep debug code inside) ----
 requestAnimationFrame(frame);
 startGame();
 </script>
