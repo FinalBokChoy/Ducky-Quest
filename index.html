@@ -17,21 +17,21 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#0a0716;color:var(--ink);font-family:'Pixelify Sans',ui-monospace,Menlo,Consolas,monospace}
 #app{max-width:420px;height:100vh;height:100dvh;max-height:920px;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
-#hud{height:34px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px;font-size:13px;color:var(--dim);background:#0d0920;border-bottom:3px solid var(--line)}
+#hud{height:38px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px;font-size:15px;color:var(--dim);background:#0d0920;border-bottom:3px solid var(--line)}
 #chip{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.5px}
-#stab{display:flex;align-items:center;gap:6px;font-size:12px}
+#stab{display:flex;align-items:center;gap:6px;font-size:14px}
 #stab i{display:block;width:54px;height:8px;background:#2a2060;border:2px solid var(--line)}
 #stab u{display:block;height:100%;width:100%;background:var(--cyan);transition:width .6s,background .6s;text-decoration:none}
-#mute{font:inherit;font-size:12px;color:var(--ink);background:var(--panel);border:2px solid var(--line);padding:2px 6px;cursor:pointer}
+#mute{font:inherit;font-size:14px;color:var(--ink);background:var(--panel);border:2px solid var(--line);padding:2px 6px;cursor:pointer}
 #stage{position:relative;flex:none;background:#000;line-height:0}
 #cv{width:100%;aspect-ratio:4/3;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 #timer{position:absolute;left:0;bottom:0;height:7px;width:100%;background:var(--pink);display:none}
 #flash{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s;background:#fff}
 #panel{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 16px;-webkit-overflow-scrolling:touch}
-.cap{font-size:17px;line-height:1.35;margin:0 0 12px;min-height:3.2em;cursor:pointer}
+.cap{font-size:20px;line-height:1.35;margin:0 0 12px;min-height:3.2em;cursor:pointer}
 .title{font-family:'Press Start 2P',monospace;font-size:19px;line-height:1.35;color:var(--accent);text-shadow:3px 3px 0 #7a2bff;margin:0 0 4px}
-.sub{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--cyan);margin:0 0 12px;letter-spacing:1px}
-.opt{display:block;width:100%;text-align:left;font:inherit;font-size:15px;line-height:1.25;color:var(--ink);background:var(--panel);border:3px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 8px;box-shadow:0 4px 0 #0a0716;opacity:0;animation:pop .28s ease-out forwards;cursor:pointer}
+.sub{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--cyan);margin:0 0 12px;letter-spacing:1px}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:18px;line-height:1.25;color:var(--ink);background:var(--panel);border:3px solid var(--line);border-radius:6px;padding:10px 12px;margin:0 0 8px;box-shadow:0 4px 0 #0a0716;opacity:0;animation:pop .28s ease-out forwards;cursor:pointer}
 .opt::before{content:"\25B6  ";color:var(--pink);font-size:10px}
 .opt:active{transform:translateY(3px);box-shadow:0 1px 0 #0a0716}
 .opt.chosen{background:var(--accent);color:#2a1a00;border-color:#fff7e0}
@@ -41,26 +41,26 @@ html,body{margin:0;height:100%;background:#0a0716;color:var(--ink);font-family:'
 .opt.bad{animation:shake .3s}
 @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.note{background:#2a2060;border:2px dashed #6b5bd6;border-radius:6px;padding:8px 10px;margin:0 0 12px;font-size:14px;line-height:1.35;color:#d9d0ff}
-.note b{display:block;font-family:'Press Start 2P',monospace;font-weight:400;font-size:8px;color:var(--cyan);margin-bottom:6px}
-.kicker{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--cyan);margin:0 0 6px}
-.duckname{font-family:'Press Start 2P',monospace;font-size:17px;line-height:1.3;color:var(--accent);margin:0 0 4px;text-shadow:2px 2px 0 #7a2bff}
-.typeline{font-size:15px;color:var(--pink);margin:0 0 8px}
-.blurb{font-size:15px;line-height:1.4;margin:0 0 12px}
-.spec{display:grid;grid-template-columns:62px 1fr 62px;align-items:center;gap:6px;font-size:12px;margin:0 0 7px;color:var(--dim)}
+.note{background:#2a2060;border:2px dashed #6b5bd6;border-radius:6px;padding:8px 10px;margin:0 0 12px;font-size:17px;line-height:1.35;color:#d9d0ff}
+.note b{display:block;font-family:'Press Start 2P',monospace;font-weight:400;font-size:9px;color:var(--cyan);margin-bottom:6px}
+.kicker{font-family:'Press Start 2P',monospace;font-size:10px;color:var(--cyan);margin:0 0 6px}
+.duckname{font-family:'Press Start 2P',monospace;font-size:18px;line-height:1.3;color:var(--accent);margin:0 0 4px;text-shadow:2px 2px 0 #7a2bff}
+.typeline{font-size:17px;color:var(--pink);margin:0 0 8px}
+.blurb{font-size:18px;line-height:1.4;margin:0 0 12px}
+.spec{display:grid;grid-template-columns:70px 1fr 70px;align-items:center;gap:6px;font-size:14px;margin:0 0 7px;color:var(--dim)}
 .spec .r{text-align:right}
 .spec .tr{height:10px;background:var(--pink);border:2px solid var(--line);position:relative}
 .spec .tr i{position:absolute;left:0;top:0;bottom:0;background:var(--cyan)}
-.card{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:8px 10px;margin:0 0 8px;font-size:14px;line-height:1.35}
-.card h4{margin:0 0 4px;font-family:'Press Start 2P',monospace;font-weight:400;font-size:9px;color:var(--accent)}
+.card{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:8px 10px;margin:0 0 8px;font-size:17px;line-height:1.35}
+.card h4{margin:0 0 4px;font-family:'Press Start 2P',monospace;font-weight:400;font-size:10px;color:var(--accent)}
 .card .bk{color:var(--pink)}.card .hl{color:#7dffb0}
-.ticket{background:#ffe9a8;color:#3a2200;border:3px solid #3a2200;border-radius:4px;padding:12px;margin:0 0 12px;position:relative;font-size:15px;line-height:1.35;box-shadow:0 0 0 3px #ffe9a8,0 0 0 6px #3a2200}
+.ticket{background:#ffe9a8;color:#3a2200;border:3px solid #3a2200;border-radius:4px;padding:12px;margin:0 0 12px;position:relative;font-size:18px;line-height:1.35;box-shadow:0 0 0 3px #ffe9a8,0 0 0 6px #3a2200}
 .ticket h3{font-family:'Press Start 2P',monospace;font-weight:400;font-size:12px;margin:0 0 8px}
-.ticket .fine{font-size:12px;opacity:.75;margin-top:8px}
-.ans{display:block;width:100%;font:inherit;font-size:17px;color:var(--ink);background:#0d0920;border:3px solid var(--accent);border-radius:6px;padding:10px 12px;margin:0 0 8px;outline:none}
+.ticket .fine{font-size:15px;opacity:.75;margin-top:8px}
+.ans{display:block;width:100%;font:inherit;font-size:20px;color:var(--ink);background:#0d0920;border:3px solid var(--accent);border-radius:6px;padding:10px 12px;margin:0 0 8px;outline:none}
 .ans.bad{animation:shake .3s;border-color:var(--pink)}
-.love{white-space:pre-line;font-size:16px;line-height:1.45;margin:0 0 12px}
-.big{font-size:15px;margin:0 0 10px;color:var(--dim)}
+.love{white-space:pre-line;font-size:19px;line-height:1.45;margin:0 0 12px}
+.big{font-size:18px;margin:0 0 10px;color:var(--dim)}
 @media (prefers-reduced-motion:reduce){.opt{animation:none;opacity:1}#flash,#stab u{transition:none}}
 </style>
 </head>
@@ -474,7 +474,7 @@ function drawDuo(t) {
 }
 function render(t) {
   T = t;
-  if (view.mode === 'photo') { drawPhoto(t); return; }
+  if (view.mode === 'photo') { drawPhoto(t); drawTransition(t); return; }
   g = ctx; ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.imageSmoothingEnabled = false;
   const sh = RM ? 0 : view.shake; if (sh) ctx.translate(Math.round((Math.random() - .5) * sh), Math.round((Math.random() - .5) * sh));
   (BG[view.bg] || BG.void)(t);
